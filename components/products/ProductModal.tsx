@@ -43,6 +43,8 @@ export interface ProductFormData {
   features: string[];
   /** Brand tags (multi-select) */
   brands: string[];
+  /** Pre-owned — listed under used equipment */
+  isUsed?: boolean;
 }
 
 export const PRODUCT_FEATURE_OPTIONS = [
@@ -78,6 +80,8 @@ interface ProductModalProps {
   mode: 'add' | 'edit' | 'view';
   product?: any;
   onSave?: (data: ProductFormData) => Promise<void>;
+  /** Default for new products (e.g. used equipment management). */
+  defaultIsUsed?: boolean;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -596,7 +600,14 @@ const ProductViewModal: React.FC<{ product: any; onClose: () => void }> = ({ pro
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, mode, product, onSave }) => {
+const ProductModal: React.FC<ProductModalProps> = ({
+  isOpen,
+  onClose,
+  mode,
+  product,
+  onSave,
+  defaultIsUsed = false,
+}) => {
   const { canChangeStatus } = useDashboardPermissions();
 
   // ── Data ──
@@ -625,6 +636,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, mode, prod
     metaDescription: product?.metaDescription || '',
     features:        normalizeFeaturesFromProduct(product),
     brands:          normalizeBrandsFromProduct(product),
+    isUsed:          Boolean(product?.isUsed) || (mode === 'add' && defaultIsUsed),
   });
 
   // ── Specs ──
@@ -668,12 +680,13 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, mode, prod
       metaDescription: p?.metaDescription ?? '',
       features: normalizeFeaturesFromProduct(p),
       brands: normalizeBrandsFromProduct(p),
+      isUsed: p ? Boolean(p.isUsed) : defaultIsUsed,
     });
     setSpecRows(buildSpecRows(p?.specifications as Record<string, unknown>, p?.specificationOrder));
     setImageSlots(initMediaSlots(p?.images || [], p?.imagePublicIds || [], 3, 'image'));
     setVideoSlots(initMediaSlots(p?.videos || [], p?.videoPublicIds || [], 2, 'video'));
     setErrors({});
-  }, [isOpen, mode, product?._id]);
+  }, [isOpen, mode, product?._id, defaultIsUsed]);
 
   const toggleProductCategory = (id: string) => {
     setForm(f => ({
@@ -847,6 +860,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, mode, prod
         metaDescription: form.metaDescription.trim(),
         features:        form.features,
         brands:          form.brands,
+        isUsed:          form.isUsed,
       });
       onClose();
     } catch (err) {
@@ -1111,6 +1125,23 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, mode, prod
                 )}
               </div>
               {errors.categoryIds && <p className="mt-1 text-xs text-red-500">{errors.categoryIds}</p>}
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={form.isUsed}
+                  onChange={(e) => setForm((f) => ({ ...f, isUsed: e.target.checked }))}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-[#0F4C69] focus:ring-[#0F4C69]/30"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-gray-700">Used product</span>
+                  <span className="block text-[11px] text-gray-500">
+                    Appears in Used Equipment catalog and used equipment management, not in new products.
+                  </span>
+                </span>
+              </label>
             </div>
 
             {/* Features & brand (multi-select) */}

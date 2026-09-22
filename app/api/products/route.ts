@@ -8,7 +8,7 @@ import { shuffleWithSeed } from '@/utils/seededShuffle.util';
 import { resolveProductImages } from '@/utils/productMedia.util';
 import { sortPopulatedCategories } from '@/lib/storefrontCategories';
 import { orderProductSpecifications } from '@/lib/productSpecifications';
-import { MAIN_CATALOG_FILTER } from '@/backend/lib/productTypeFilters';
+import { MAIN_CATALOG_FILTER, USED_EQUIPMENT_FILTER } from '@/backend/lib/productTypeFilters';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,8 +68,12 @@ export async function GET(req: NextRequest) {
     const onSale      = searchParams.get('sale') === '1';
     const sortBy    = searchParams.get('sort') ?? 'newest';
     const excludeId = (searchParams.get('exclude') ?? '').trim();
+    const usedOnly = searchParams.get('used') === '1' || searchParams.get('used') === 'true';
 
-    const filter: Record<string, unknown> = { status: 'active', ...MAIN_CATALOG_FILTER };
+    const filter: Record<string, unknown> = {
+      status: 'active',
+      ...(usedOnly ? USED_EQUIPMENT_FILTER : MAIN_CATALOG_FILTER),
+    };
 
     if (excludeId && mongoose.Types.ObjectId.isValid(excludeId)) {
       filter._id = { $ne: excludeId };

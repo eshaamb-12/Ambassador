@@ -24,6 +24,8 @@ export interface IProduct extends Document {
   features: string[];
   /** Brand tags — subset of ambassador | imported */
   brands: string[];
+  /** Pre-owned item — shown on used equipment catalog, hidden from new products listing. */
+  isUsed?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -125,6 +127,10 @@ const productSchema = new Schema<IProduct>(
       type: [String],
       default: [],
     },
+    isUsed: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
@@ -152,6 +158,7 @@ if (process.env.NODE_ENV !== 'production' && mongoose.models.Product) {
 
 // Indexes for fast storefront queries
 productSchema.index({ status: 1, createdAt: -1 });
+productSchema.index({ status: 1, isUsed: 1, createdAt: -1 });
 productSchema.index({ categories: 1, status: 1 });
 productSchema.index({ name: 'text' });                // text search
 

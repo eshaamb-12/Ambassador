@@ -11,9 +11,12 @@ import { useCart } from '@/contexts/CartContext';
 import PageLoader from '@/components/ui/PageLoader';
 import {
   PRODUCTS_PATH,
+  USED_EQUIPMENT_PATH,
   productsCategoryPath,
+  usedEquipmentCategoryPath,
   productDetailPath,
   productUrlSegment,
+  slugFromCatalogPath,
   slugFromCollectionPath,
 } from '@/lib/siteRoutes';
 import { useStorefrontCategories } from '@/hooks/useStorefrontCategories';
@@ -243,12 +246,21 @@ function pageFromSearchParams(sp: URLSearchParams): number {
   return Number.isFinite(n) && n > 0 ? n : 1;
 }
 
+export type StorefrontProductCatalog = 'new' | 'used';
+
 interface ProductsPageProps {
-  /** When routed via /products/[categorySlug] */
+  /** When routed via /products/[categorySlug] or /used-equipment/[categorySlug] */
   categorySlugFromPath?: string;
+  /** `used` — pre-owned catalog at /used-equipment */
+  catalog?: StorefrontProductCatalog;
 }
 
-const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
+const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPageProps = {}) => {
+  const isUsedCatalog = catalog === 'used';
+  const listingBasePath = isUsedCatalog ? USED_EQUIPMENT_PATH : PRODUCTS_PATH;
+  const categoryPathForSlug = isUsedCatalog ? usedEquipmentCategoryPath : productsCategoryPath;
+  const slugFromListingPath = (path: string) =>
+    isUsedCatalog ? slugFromCatalogPath(path, listingBasePath) : slugFromCollectionPath(path);
   const searchParams  = useSearchParams();
   const router        = useRouter();
   const pathname      = usePathname();
@@ -312,8 +324,8 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
   const { addToCart } = useCart();
 
   const slugPath = useMemo(
-    () => categorySlugFromPath ?? slugFromCollectionPath(pathname),
-    [categorySlugFromPath, pathname],
+    () => categorySlugFromPath ?? slugFromListingPath(pathname),
+    [categorySlugFromPath, pathname, isUsedCatalog],
   );
 
   const categoryTitleForSlug = useMemo(() => {
@@ -381,7 +393,7 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
       if (q) {
         p.set('search', q);
         const searchQs = p.toString();
-        return searchQs ? `${PRODUCTS_PATH}?${searchQs}` : PRODUCTS_PATH;
+        return searchQs ? `${listingBasePath}?${searchQs}` : listingBasePath;
       }
 
       if (cat && cat !== ALL) {
@@ -389,14 +401,14 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
           categoryMeta.find((c) => c.title === cat)?.slug ??
           (slugPath && categoryTitleForSlug === cat ? slugPath : undefined);
         if (slug) {
-          return qs ? `${productsCategoryPath(slug)}?${qs}` : productsCategoryPath(slug);
+          return qs ? `${categoryPathForSlug(slug)}?${qs}` : categoryPathForSlug(slug);
         }
         p.set('category', cat);
         const legacyQs = p.toString();
-        return legacyQs ? `${PRODUCTS_PATH}?${legacyQs}` : PRODUCTS_PATH;
+        return legacyQs ? `${listingBasePath}?${legacyQs}` : listingBasePath;
       }
 
-      return qs ? `${PRODUCTS_PATH}?${qs}` : PRODUCTS_PATH;
+      return qs ? `${listingBasePath}?${qs}` : listingBasePath;
     },
     [
       activeCategory,
@@ -410,6 +422,8 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
       categoryMeta,
       slugPath,
       categoryTitleForSlug,
+      listingBasePath,
+      categoryPathForSlug,
     ]
   );
 
@@ -467,7 +481,7 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
   useEffect(() => {
     const legacyTitle = searchParams.get('category')?.trim();
     if (!legacyTitle || searchParams.get('search')?.trim() || categoryMeta.length === 0) return;
-    if (slugFromCollectionPath(pathname) || categorySlugFromPath) return;
+    if (slugFromListingPath(pathname) || categorySlugFromPath) return;
 
     const match = categoryMeta.find((c) => c.title.toLowerCase() === legacyTitle.toLowerCase());
     if (!match?.slug) return;
@@ -475,10 +489,10 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('category');
     const qs = params.toString();
-    router.replace(qs ? `${productsCategoryPath(match.slug)}?${qs}` : productsCategoryPath(match.slug), {
+    router.replace(qs ? `${categoryPathForSlug(match.slug)}?${qs}` : categoryPathForSlug(match.slug), {
       scroll: false,
     });
-  }, [searchParams, categoryMeta, pathname, categorySlugFromPath, router]);
+  }, [searchParams, categoryMeta, pathname, categorySlugFromPath, router, isUsedCatalog]);
 
   // Fetch products from server whenever any filter or page changes
   useEffect(() => {
@@ -509,6 +523,7 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
 
         const activeFeats = FEATURE_FILTERS.filter(({ key }) => features[key]).map(({ apiFlag }) => apiFlag);
         if (activeFeats.length)             params.set('features', activeFeats.join(','));
+        if (isUsedCatalog)                  params.set('used', '1');
 
         const res  = await fetch(`/api/products?${params.toString()}`, { cache: 'no-store' });
         const json = await res.json();
@@ -529,7 +544,7 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
       }
     })();
     return () => { cancelled = true; };
-  }, [currentPage, searchTerm, activeCategory, priceRange, sortBy, brands, features, availability, shuffleSeed]);
+  }, [currentPage, searchTerm, activeCategory, priceRange, sortBy, brands, features, availability, shuffleSeed, isUsedCatalog]);
 
   // Reset to page 1 when a filter changes — not on mount or URL/path hydration (?page=2 on category URLs)
   useEffect(() => {
@@ -656,7 +671,8 @@ const ProductsPage = ({ categorySlugFromPath }: ProductsPageProps = {}) => {
                       <span className="font-semibold">
                         {total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, total)}
                       </span>{' '}
-                      of <span className="font-semibold">{total}</span> products
+                      of <span className="font-semibold">{total}</span>{' '}
+                      {isUsedCatalog ? 'used items' : 'products'}
                     </>
                   )}
                 </>

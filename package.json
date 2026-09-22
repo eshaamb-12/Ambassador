@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "node scripts/next-dev.mjs",
     "dev:clean": "next dev",
+    "clean:cache": "node scripts/clean-next-cache.mjs",
     "build": "node scripts/next-build.mjs",
     "start": "node server.js",
     "lint": "eslint",

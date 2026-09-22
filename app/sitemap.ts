@@ -24,6 +24,7 @@ const STATIC_PAGES: StaticPage[] = [
   { path: '/gallery', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/custom-kitchen', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/products', priority: 0.9, changeFrequency: 'daily' },
+  { path: '/used-equipment', priority: 0.85, changeFrequency: 'daily' },
   { path: '/returns', priority: 0.4, changeFrequency: 'yearly' },
 ];
 

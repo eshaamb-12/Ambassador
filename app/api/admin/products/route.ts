@@ -21,7 +21,7 @@ const ADMIN_PAGE_LIMIT = 10;
 // Fields needed by the admin product listing table
 const ADMIN_LIST_PROJECTION = {
   name: 1, slug: 1, price: 1, originalPrice: 1,
-  stock: 1, status: 1, brands: 1, features: 1,
+  stock: 1, status: 1, brands: 1, features: 1, isUsed: 1,
   categories: 1, images: { $slice: 1 }, createdAt: 1,
 };
 
@@ -149,6 +149,7 @@ export async function POST(req: NextRequest) {
       features,
       brands,
       weightKg,
+      isUsed,
     } = body;
 
     const categoryIds = resolveProductCategoryIds(body);
@@ -203,6 +204,7 @@ export async function POST(req: NextRequest) {
       metaDescription: metaDescription?.trim() ?? '',
       features: sanitizeProductFeatures(features),
       brands: sanitizeProductBrands(brands),
+      isUsed: Boolean(isUsed),
     });
 
     const populated = await product.populate([{ path: 'categories', select: 'title' }]);

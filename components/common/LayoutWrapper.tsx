@@ -18,6 +18,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   const isAdminRoute =
     pathname?.startsWith('/admin') ||
     pathname?.startsWith('/product-management') ||
+    pathname?.startsWith('/used-equipment-management') ||
     pathname?.startsWith('/category-management') ||
     pathname?.startsWith('/users') ||
     pathname?.startsWith('/orders-management') ||

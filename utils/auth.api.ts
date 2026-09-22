@@ -84,7 +84,26 @@ async function request<T>(
     ...options,
   });
 
-  const data: ApiResponse<T> = await res.json();
+  const contentType = res.headers.get('content-type') ?? '';
+  const raw = await res.text();
+
+  if (!contentType.includes('application/json')) {
+    if (res.status === 404) {
+      throw new AuthApiError(
+        'Sign-in service is unavailable (API not found). Stop the dev server, run npm run clean:cache, then npm run dev again.',
+      );
+    }
+    throw new AuthApiError(
+      'Sign-in service returned an unexpected response. Restart the dev server or try again in a moment.',
+    );
+  }
+
+  let data: ApiResponse<T>;
+  try {
+    data = JSON.parse(raw) as ApiResponse<T>;
+  } catch {
+    throw new AuthApiError('Sign-in service returned invalid data. Please try again.');
+  }
 
   if (!res.ok) {
     throw new AuthApiError(data.message || 'Something went wrong. Please try again.', data.errors);

@@ -88,6 +88,7 @@ export async function PATCH(
       features,
       brands,
       weightKg,
+      isUsed,
     } = body;
 
     if (name !== undefined) product.name = name.trim();
@@ -134,6 +135,7 @@ export async function PATCH(
     if (metaDescription !== undefined) product.metaDescription = metaDescription?.trim() ?? '';
     if (features !== undefined) product.features = sanitizeProductFeatures(features);
     if (brands !== undefined) product.brands = sanitizeProductBrands(brands);
+    if (isUsed !== undefined) product.isUsed = Boolean(isUsed);
 
     if (images !== undefined) {
       const oldIds: string[] = product.imagePublicIds ?? [];

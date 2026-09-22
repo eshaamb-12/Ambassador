@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { PRODUCTS_PATH, SPARE_PARTS_PATH } from '@/lib/siteRoutes';
+import { PRODUCTS_PATH, SPARE_PARTS_PATH, USED_EQUIPMENT_PATH } from '@/lib/siteRoutes';
 import { COMPLAINT_PORTAL_URL } from '@/lib/siteLinks';
 
 /** Public routes — keep in sync with main site navigation */
 const SERVICE_LINKS = [
   { label: 'Products', href: PRODUCTS_PATH },
+  { label: 'Used equipment', href: USED_EQUIPMENT_PATH },
   { label: 'Spare parts', href: SPARE_PARTS_PATH },
   { label: 'Custom kitchen', href: '/custom-kitchen' },      
  

@@ -8,10 +8,14 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ?? '',
     NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '923314937412',
   },
+  /** Do not bundle these on the server — faster compiles and smaller server graphs. */
+  serverExternalPackages: ['mongoose', 'bcryptjs', 'nodemailer', 'cloudinary', 'google-auth-library'],
   experimental: {
     serverActions: {
       bodySizeLimit: '55mb',
     },
+    /** Tree-shake heavy chart/UI imports instead of pulling full packages. */
+    optimizePackageImports: ['recharts'],
   },
   images: {
     remotePatterns: [

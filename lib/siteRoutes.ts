@@ -4,6 +4,9 @@ export const PRODUCTS_PATH = '/products';
 /** Public spare parts catalog — standalone from products. */
 export const SPARE_PARTS_PATH = '/spare-parts';
 
+/** Pre-owned equipment catalog — separate from new products. */
+export const USED_EQUIPMENT_PATH = '/used-equipment';
+
 /** Careers landing page. */
 export const CAREERS_PATH = '/careers';
 
@@ -87,6 +90,18 @@ export function isCollectionProductDetailPath(pathname: string): boolean {
 export function productsCategoryPath(slug: string): string {
   const clean = slug.trim().toLowerCase();
   return `${PRODUCTS_PATH}/${encodeURIComponent(clean)}`;
+}
+
+export function usedEquipmentCategoryPath(slug: string): string {
+  const clean = slug.trim().toLowerCase();
+  return `${USED_EQUIPMENT_PATH}/${encodeURIComponent(clean)}`;
+}
+
+/** Category slug from a catalog listing URL (/products/foo or /used-equipment/foo). */
+export function slugFromCatalogPath(pathname: string, basePath: string): string | null {
+  if (!pathname.startsWith(`${basePath}/`)) return null;
+  const segment = pathname.slice(basePath.length + 1).split('/').filter(Boolean)[0];
+  return segment ? decodeURIComponent(segment) : null;
 }
 
 /** @deprecated Use productsCategoryPath */

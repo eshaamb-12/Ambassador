@@ -1,5 +1,5 @@
-import ProductsPage from '@/admin/pages/admin-products/page';
+import AdminProductsPage from '@/admin/pages/admin-products/page';
 
 export default function ProductManagement() {
-  return <ProductsPage />;
+  return <AdminProductsPage catalog="main" />;
 }

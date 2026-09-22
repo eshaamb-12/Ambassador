@@ -37,6 +37,7 @@ export function dashboardHomePath(role?: string | null): string {
 /** Pages a manager may open in the dashboard. */
 export const MANAGER_ALLOWED_PATHS = [
   '/product-management',
+  '/used-equipment-management',
   '/category-management',
   '/spare-parts-management',
   '/gallery-management',

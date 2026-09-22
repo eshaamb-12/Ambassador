@@ -87,7 +87,36 @@ const EXPORT_SCOPE_OPTIONS: {
   },
 ];
 
-const ProductsPage = () => {
+type AdminProductCatalog = 'main' | 'used';
+
+const CATALOG_CONFIG: Record<
+  AdminProductCatalog,
+  {
+    productType: AdminProductCatalog;
+    pageTitle: string;
+    pageSubtitle: string;
+    addLabel: string;
+    defaultIsUsed: boolean;
+  }
+> = {
+  main: {
+    productType: 'main',
+    pageTitle: 'Product Management',
+    pageSubtitle: 'Manage your kitchen product catalogue',
+    addLabel: 'Add Product',
+    defaultIsUsed: false,
+  },
+  used: {
+    productType: 'used',
+    pageTitle: 'Used Equipment Management',
+    pageSubtitle: 'Manage pre-owned equipment separately from new products',
+    addLabel: 'Add Used Equipment',
+    defaultIsUsed: true,
+  },
+};
+
+const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog }) => {
+  const catalogUi = CATALOG_CONFIG[catalog];
   const { canDelete, canChangeStatus } = useDashboardPermissions();
   const [products,     setProducts]    = useState<Product[]>([]);
   const [categories,   setCategories]  = useState<Category[]>([]);
@@ -125,7 +154,7 @@ const ProductsPage = () => {
       const params = new URLSearchParams();
       params.set('page',  String(page));
       params.set('limit', String(ADMIN_PAGE_SIZE));
-      params.set('productType', 'main');
+      params.set('productType', catalogUi.productType);
       if (searchTerm.trim())      params.set('search',   searchTerm.trim());
       if (filterStatus !== 'all') params.set('status',   filterStatus);
       if (filterStock  !== 'all') params.set('stock',    filterStock);
@@ -143,7 +172,7 @@ const ProductsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, filterCat, filterStatus, filterStock]);
+  }, [searchTerm, filterCat, filterStatus, filterStock, catalogUi.productType]);
 
   // Fetch categories once
   useEffect(() => {
@@ -200,10 +229,11 @@ const ProductsPage = () => {
   };
 
   const fetchExportProducts = async (scope: ExportScope) => {
+    const typeQs = `productType=${catalogUi.productType}`;
     const url =
       scope === 'selected'
-        ? `/api/admin/products/export?ids=${encodeURIComponent(uniqueIdsInOrder(selectedIds).join(','))}`
-        : `/api/admin/products/export?stock=${scope}`;
+        ? `/api/admin/products/export?${typeQs}&ids=${encodeURIComponent(uniqueIdsInOrder(selectedIds).join(','))}`
+        : `/api/admin/products/export?${typeQs}&stock=${scope}`;
 
     const res = await fetch(url, { credentials: 'include' });
     const data = await res.json();
@@ -328,8 +358,8 @@ const ProductsPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Product Management</h1>
-            <p className="text-gray-500 text-sm mt-1">Manage your kitchen product catalogue</p>
+            <h1 className="text-2xl font-bold text-gray-900">{catalogUi.pageTitle}</h1>
+            <p className="text-gray-500 text-sm mt-1">{catalogUi.pageSubtitle}</p>
           </div>
           <button
             onClick={() => { setSelectedProduct(null); setModalMode('add'); }}
@@ -338,7 +368,7 @@ const ProductsPage = () => {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
             </svg>
-            Add Product
+            {catalogUi.addLabel}
           </button>
         </div>
 
@@ -793,6 +823,7 @@ const ProductsPage = () => {
             mode={modalMode}
             product={selectedProduct ?? undefined}
             onSave={modalMode !== 'view' ? handleSave : undefined}
+            defaultIsUsed={catalogUi.defaultIsUsed}
           />
         )}
 
@@ -813,4 +844,4 @@ const ProductsPage = () => {
   );
 };
 
-export default ProductsPage;
+export default AdminProductsPage;

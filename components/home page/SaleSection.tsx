@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { productsHref, productDetailPath, primaryCategorySlug, productUrlSegment } from '@/lib/siteRoutes';
 import { PRODUCT_PLACEHOLDER } from '@/utils/productMedia.util';
+import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
+import type { HomeSaleContent } from '@/lib/sitePages.types';
 
 interface SaleProduct {
   _id: string;
@@ -107,7 +109,12 @@ function SaleProductCard({ product }: { product: SaleProduct }) {
   );
 }
 
-export default function SaleSection() {
+interface SaleSectionProps {
+  content?: HomeSaleContent;
+}
+
+export default function SaleSection({ content: contentProp }: SaleSectionProps) {
+  const content = contentProp ?? DEFAULT_HOME_PAGE_CONFIG.sale;
   const [products, setProducts] = useState<SaleProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [paused, setPaused] = useState(false);
@@ -252,18 +259,18 @@ export default function SaleSection() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#E36630] opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[#E36630]" />
               </span>
-              <span className="truncate">Limited Time Offers</span>
+              <span className="truncate">{content.badge}</span>
             </span>
             <h2 className="text-2xl font-bold leading-tight text-white sm:text-3xl md:text-4xl lg:text-5xl">
-              Hot Deals on{' '}
+              {content.titleBefore}{' '}
               <span className="text-[#E36630]">
                 <br className="sm:hidden" />
                 <span className="hidden sm:inline"> </span>
-                Premium Commercial Kitchen Equipment
+                {content.titleHighlight}
               </span>
             </h2>
             <p className="mt-2 text-xs leading-relaxed text-white/70 sm:mt-3 sm:text-sm md:text-base">
-              Grab exclusive discounts on commercial kitchen essentials in Pakistan — from fryers and ovens to cooking ranges — while stocks last.
+              {content.description}
             </p>
           </div>
 
@@ -271,7 +278,7 @@ export default function SaleSection() {
             href={productsHref({ features: 'on_sale' })}
             className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[#E36630] px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-[#E36630]/30 transition-all hover:bg-[#cc5a2a] hover:shadow-[#E36630]/40 sm:w-auto sm:max-w-none sm:px-5 sm:text-sm"
           >
-            View All Sales
+            {content.ctaText}
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>

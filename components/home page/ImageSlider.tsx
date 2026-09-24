@@ -2,63 +2,27 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { PRODUCTS_PATH } from '@/lib/siteRoutes';
+import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
+import type { HomeHeroSlide } from '@/lib/sitePages.types';
 
 const SLIDE_DURATION = 8000; // ms per slide
 
-const slides = [
-  {
-    id: 1,
-    image: '/Images/4000-by-1800.png',
-    alt: 'Commercial kitchen equipment manufacturing facility in Pakistan – Ambassador',
-    badge: 'Industry Leading',
-    title: 'Premium Commercial Kitchen Equipment in Pakistan',
-    subtitle:
-      'Engineered for performance, built for the professional kitchen — trusted by restaurants, hotels, and food businesses across Pakistan as a leading commercial kitchen equipment manufacturer.',
-    cta: 'Explore Products',
-    ctaHref: PRODUCTS_PATH,
-    align: 'left' as const,
-    titleTag: 'h1' as const,
-  },
-  {
-    id: 2,
-    image: '/Images/40000-by-4-Simple.png',
-    alt: 'Professional restaurant kitchen solutions — food preparation and grilling equipment Pakistan',
-    badge: 'Complete Kitchen Solutions',
-    title: 'Professional Restaurant Kitchen Equipment Solutions',
-    subtitle:
-      'Everything your kitchen needs — from concept to completion. Ambassador delivers custom commercial kitchen design and industrial kitchen equipment for restaurants, hotels, and institutions, backed by 25+ years of expertise.',
-    cta: 'View Catalogue',
-    ctaHref: PRODUCTS_PATH,
-    align: 'center' as const,
-    titleTag: 'h2' as const,
-  },
-  {
-    id: 3,
-    image: '/Images/banner-3.png',
-    alt: 'Commercial ovens and cooking range equipment – rotary rack oven, deck oven, griddle Pakistan',
-    badge: 'Full Product Range',
-    title: 'Complete Range of Commercial-Grade Kitchen Machinery',
-    subtitle:
-      'From griddles to rotary rack ovens — explore our complete commercial oven and cooking range lineup, including bakery ovens, deck ovens, and industrial kitchen machinery for every scale of operation.',
-    cta: 'Shop Now',
-    ctaHref: PRODUCTS_PATH,
-    align: 'left' as const,
-    titleTag: 'h2' as const,
-  },
-
-];
-
 type SlideDirection = 'next' | 'prev';
 
-function resolveDirection(from: number, to: number): SlideDirection {
+function resolveDirection(from: number, to: number, count: number): SlideDirection {
   if (from === to) return 'next';
-  const forward = (to - from + slides.length) % slides.length;
-  const backward = (from - to + slides.length) % slides.length;
+  const forward = (to - from + count) % count;
+  const backward = (from - to + count) % count;
   return forward <= backward ? 'next' : 'prev';
 }
 
-export default function ImageSlider() {
+interface ImageSliderProps {
+  slides?: HomeHeroSlide[];
+}
+
+export default function ImageSlider({ slides: slidesProp }: ImageSliderProps) {
+  const slides =
+    slidesProp?.length ? slidesProp : DEFAULT_HOME_PAGE_CONFIG.hero.slides;
   const [current, setCurrent]   = useState(0);
   const [animKey, setAnimKey]   = useState(0); // forces re-mount → re-animate
   const [direction, setDirection] = useState<SlideDirection>('next');
@@ -72,13 +36,20 @@ export default function ImageSlider() {
 
   const goTo = useCallback((idx: number, dir?: SlideDirection) => {
     if (currentRef.current === idx) return;
-    setDirection(dir ?? resolveDirection(currentRef.current, idx));
+    setDirection(dir ?? resolveDirection(currentRef.current, idx, slides.length));
     setAnimKey((k) => k + 1);
     setCurrent(idx);
   }, []);
 
-  const next = useCallback(() => goTo((current + 1) % slides.length, 'next'), [current, goTo]);
-  const prev = useCallback(() => goTo((current - 1 + slides.length) % slides.length, 'prev'), [current, goTo]);
+  const next = useCallback(() => goTo((current + 1) % slides.length, 'next'), [current, goTo, slides.length]);
+  const prev = useCallback(
+    () => goTo((current - 1 + slides.length) % slides.length, 'prev'),
+    [current, goTo, slides.length],
+  );
+
+  useEffect(() => {
+    if (current >= slides.length) setCurrent(0);
+  }, [slides.length, current]);
 
   // Auto-advance
   useEffect(() => {

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import HomePage from '../client/pages/home/HomePage';
 import { canonicalMetadata } from '@/lib/siteUrl';
+import { getHomePageConfig } from '@/backend/lib/loadSitePage';
 
 export const metadata: Metadata = {
   title: 'Ambassador Commercial Kitchen Equipment | Commercial Kitchen Equipment Pakistan',
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
   ...canonicalMetadata('/'),
 };
 
-export default function Home() {
-  return <HomePage />;
+export default async function Home() {
+  const config = await getHomePageConfig();
+  return <HomePage config={config} />;
 }

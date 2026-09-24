@@ -43,6 +43,7 @@ export const MANAGER_ALLOWED_PATHS = [
   '/gallery-management',
   '/blog-management',
   '/seo-tracking',
+  '/pages-management',
 ] as const;
 
 export function isManagerAllowedPath(pathname: string): boolean {

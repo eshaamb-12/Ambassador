@@ -1,6 +1,8 @@
 'use client';
 
 import Image from 'next/image';
+import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
+import type { HomeClientLogosContent } from '@/lib/sitePages.types';
 
 /**
  * Client logo slider — edit this list to swap images or reorder.
@@ -123,7 +125,12 @@ function LogoSegment({
   );
 }
 
-const ClientLogosSlider = () => {
+interface ClientLogosSliderProps {
+  intro?: HomeClientLogosContent;
+}
+
+const ClientLogosSlider = ({ intro: introProp }: ClientLogosSliderProps) => {
+  const intro = introProp ?? DEFAULT_HOME_PAGE_CONFIG.clientLogos;
   return (
     <>
       <style>{`
@@ -179,15 +186,14 @@ const ClientLogosSlider = () => {
           <div className="mb-8 text-center sm:mb-10 md:mb-12">
             <span className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F4C69] sm:mb-4 sm:gap-2 sm:text-sm sm:tracking-widest">
               <span className="h-px w-6 bg-[#0F4C69] sm:w-8" />
-              Trusted By
+              {intro.eyebrow}
               <span className="h-px w-6 bg-[#0F4C69] sm:w-8" />
             </span>
             <h2 className="mb-3 text-2xl font-bold leading-tight text-gray-900 sm:mb-4 sm:text-3xl md:text-4xl">
-              Businesses That <span className="text-[#E36630]">Rely on Us</span>
+              {intro.title} <span className="text-[#E36630]">{intro.titleHighlight}</span>
             </h2>
             <p className="mx-auto max-w-2xl px-1 text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg">
-              From five-star hotels to fast-food chains — over 1,200 businesses across Pakistan trust Ambassador
-              for their commercial kitchen needs.
+              {intro.description}
             </p>
             <div className="mx-auto mt-4 h-1 w-12 rounded-full bg-[#E36630] sm:mt-5 sm:w-16" />
           </div>

@@ -1,40 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-
-interface StatItem {
-  value: number;
-  suffix: string;
-  label: string;
-  description: string;
-}
-
-const stats: StatItem[] = [
-  {
-    value: 25,
-    suffix: '+',
-    label: 'Years Experience',
-    description: 'Serving commercial kitchens across Pakistan since 1999',
-  },
-  {
-    value: 1500,
-    suffix: '+',
-    label: 'Products',
-    description: 'Comprehensive range of commercial kitchen equipment for every need',
-  },
-  {
-    value: 3000,
-    suffix: '+',
-    label: 'Happy Clients',
-    description: 'Hotels, restaurants & institutions across Pakistan',
-  },
-  {
-    value: 13,
-    suffix: '',
-    label: 'Industry Sectors',
-    description: 'From fast food chains to hospital kitchens',
-  },
-];
+import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
+import type { HomeStatItem, HomeStatsContent } from '@/lib/sitePages.types';
 
 function useCountUp(target: number, duration: number, active: boolean) {
   const [count, setCount] = useState(0);
@@ -53,7 +21,7 @@ function useCountUp(target: number, duration: number, active: boolean) {
   return count;
 }
 
-const StatCard = ({ stat, active }: { stat: StatItem; active: boolean }) => {
+const StatCard = ({ stat, active }: { stat: HomeStatItem; active: boolean }) => {
   const count = useCountUp(stat.value, 1800, active);
   return (
     <div className="bg-white px-3 py-4 text-center sm:px-4 sm:py-5 md:bg-transparent md:px-4 md:py-6 lg:py-0">
@@ -67,7 +35,12 @@ const StatCard = ({ stat, active }: { stat: StatItem; active: boolean }) => {
   );
 };
 
-const StatsSection = () => {
+interface StatsSectionProps {
+  content?: HomeStatsContent;
+}
+
+const StatsSection = ({ content: contentProp }: StatsSectionProps) => {
+  const content = contentProp ?? DEFAULT_HOME_PAGE_CONFIG.stats;
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
 
@@ -79,7 +52,7 @@ const StatsSection = () => {
           observer.disconnect();
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -91,30 +64,26 @@ const StatsSection = () => {
         <div className="mb-6 text-center sm:mb-8 md:mb-10">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F4C69] sm:gap-2 sm:text-sm sm:tracking-widest">
             <span className="h-px w-5 bg-[#0F4C69] sm:w-6" />
-            Our Track Record
+            {content.eyebrow}
             <span className="h-px w-5 bg-[#0F4C69] sm:w-6" />
           </span>
           <h2 className="mt-3 text-2xl font-bold text-[#0F4C69] sm:mt-4 sm:text-3xl md:text-4xl">
-            Our Track Record
+            {content.heading}
           </h2>
         </div>
 
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white md:rounded-none md:border-0 md:bg-transparent">
           <div className="grid grid-cols-2 divide-x divide-y divide-gray-200 md:grid-cols-4 md:divide-y-0">
-            {stats.map((stat, i) => (
+            {content.stats.map((stat, i) => (
               <StatCard key={i} stat={stat} active={active} />
             ))}
           </div>
         </div>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-4 border-t border-gray-100 pt-6 sm:mt-10 sm:flex-row sm:flex-wrap sm:gap-6 sm:pt-8 md:gap-12">
-          {[
-            'ISO Certified Manufacturing',
-            'Nationwide Delivery & Installation',
-            '1-Year Warranty on All Products',
-          ].map((badge, i) => (
+          {content.trustBadges.map((badge) => (
             <div
-              key={i}
+              key={badge}
               className="flex max-w-xs items-center justify-center gap-2 text-center text-xs text-gray-600 sm:max-w-none sm:text-sm"
             >
               <svg className="h-4 w-4 shrink-0 text-[#0F4C69]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>

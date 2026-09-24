@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import AboutPageEditor from '@/admin/pages/pages-management/AboutPageEditor';
 import HomePageEditor from '@/admin/pages/pages-management/HomePageEditor';
-import { getHomePageConfig, isManagedPageSlug } from '@/backend/lib/loadSitePage';
+import { getAboutPageConfig, getHomePageConfig, isManagedPageSlug } from '@/backend/lib/loadSitePage';
 import { MANAGED_PAGES } from '@/lib/sitePages.types';
 
 export default async function PageEditorAppRoute({
@@ -25,8 +26,6 @@ export default async function PageEditorAppRoute({
   }
 
   const meta = MANAGED_PAGES.find((p) => p.slug === slug)!;
-  const initialConfig = slug === 'home' ? await getHomePageConfig() : null;
-
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -34,9 +33,8 @@ export default async function PageEditorAppRoute({
           <h1 className="text-3xl font-bold text-gray-900">{meta.title}</h1>
           <p className="mt-1 text-sm text-gray-500">{meta.path}</p>
         </div>
-        {slug === 'home' && initialConfig ? (
-          <HomePageEditor initialConfig={initialConfig} />
-        ) : null}
+        {slug === 'home' ? <HomePageEditor initialConfig={await getHomePageConfig()} /> : null}
+        {slug === 'about' ? <AboutPageEditor initialConfig={await getAboutPageConfig()} /> : null}
       </div>
     </DashboardLayout>
   );

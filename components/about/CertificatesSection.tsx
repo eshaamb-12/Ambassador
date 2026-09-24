@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
+import { DEFAULT_ABOUT_PAGE_CONFIG } from '@/lib/aboutPage.defaults';
+import type { AboutIntroHeader } from '@/lib/aboutPage.types';
 
 const certificates = [
   { name: 'Zafar-Mahmood-Abbasi-Certificate', image: '/Images/about/Testing.png' },
@@ -78,7 +80,12 @@ function CertificateCard({
   );
 }
 
-const CertificatesSection = () => {
+interface CertificatesSectionProps {
+  intro?: AboutIntroHeader;
+}
+
+const CertificatesSection = ({ intro: introProp }: CertificatesSectionProps) => {
+  const intro = introProp ?? DEFAULT_ABOUT_PAGE_CONFIG.certificates;
   const [current, setCurrent] = useState(0);
   const [slidesPerView, setSlidesPerView] = useState(1);
   const [paused, setPaused] = useState(false);
@@ -151,16 +158,14 @@ const CertificatesSection = () => {
         <div className="container mx-auto mb-12 px-4 text-center">
           <span className="mb-4 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-[#0F4C69]">
             <span className="h-px w-8 bg-[#0F4C69]" />
-            Accreditations
+            {intro.eyebrow}
             <span className="h-px w-8 bg-[#0F4C69]" />
           </span>
           <h2 className="mb-4 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
-            Standards That Back{' '}
-            <span className="text-[#E36630]">Our Quality</span>
+            {intro.title} <span className="text-[#E36630]">{intro.titleHighlight}</span>
           </h2>
           <p className="mx-auto max-w-2xl text-base leading-relaxed text-gray-500 md:text-lg">
-            Recognized international certifications that confirm our commitment to quality, safety,
-            and compliance at every level.
+            {intro.description}
           </p>
           <div className="mx-auto mt-5 h-1 w-16 rounded-full bg-[#E36630]" />
         </div>

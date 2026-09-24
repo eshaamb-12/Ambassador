@@ -1,81 +1,67 @@
 'use client';
 
 import Image from 'next/image';
+import { DEFAULT_ABOUT_PAGE_CONFIG } from '@/lib/aboutPage.defaults';
+import type { AboutCompanyContent } from '@/lib/aboutPage.types';
 
-const highlights = [
-  { value: '15+', label: 'Years of Experience' },
-  { value: '500+', label: 'Products Supplied' },
-  { value: '1200+', label: 'Happy Clients' },
-  { value: '50+', label: 'Cities Covered' },
-];
+interface CompanySectionProps {
+  content?: AboutCompanyContent;
+}
 
-const CompanySection = () => {
+const CompanySection = ({ content: contentProp }: CompanySectionProps) => {
+  const content = contentProp ?? DEFAULT_ABOUT_PAGE_CONFIG.company;
+
   return (
-    <section className="py-16 border-t border-gray-200">
+    <section className="border-t border-gray-200 py-16">
       <div className="container mx-auto px-4">
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
-
-          {/* ── Left: Image ───────────────────────────────── */}
+        <div className="grid grid-cols-1 items-center gap-14 lg:grid-cols-2">
           <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+            <div className="relative overflow-hidden rounded-2xl shadow-xl">
               <Image
-                src="/Images/about/chef.jpg"
-                alt="Ambassador commercial kitchen"
+                src={content.imageUrl}
+                alt={content.imageAlt}
                 width={600}
                 height={700}
                 className="w-full object-cover"
               />
-              {/* Orange accent bar */}
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#E36630]" />
             </div>
 
-            {/* Floating badge */}
-            <div className="absolute -bottom-5 -right-5 bg-[#0F4C69] text-white rounded-2xl px-6 py-4 shadow-lg hidden md:block">
-              <p className="text-3xl font-bold leading-none">15+</p>
-              <p className="text-xs text-white/70 mt-1 uppercase tracking-wide">Years Trusted</p>
+            <div className="absolute -bottom-5 -right-5 hidden rounded-2xl bg-[#0F4C69] px-6 py-4 text-white shadow-lg md:block">
+              <p className="text-3xl font-bold leading-none">{content.floatBadgeValue}</p>
+              <p className="mt-1 text-xs uppercase tracking-wide text-white/70">{content.floatBadgeLabel}</p>
             </div>
           </div>
 
-          {/* ── Right: Content ────────────────────────────── */}
           <div>
-            {/* Section label */}
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#0F4C69] uppercase tracking-widest mb-4">
-              <span className="w-8 h-px bg-[#0F4C69]" />
-              Who We Are
-              <span className="w-8 h-px bg-[#0F4C69]" />
+            <span className="mb-4 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-[#0F4C69]">
+              <span className="h-px w-8 bg-[#0F4C69]" />
+              {content.eyebrow}
+              <span className="h-px w-8 bg-[#0F4C69]" />
             </span>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight">
-              Pakistan&apos;s Trusted Partner in{' '}
-              <span className="text-[#E36630]">Commercial Kitchen Equipment</span>
+            <h2 className="mb-5 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+              {content.titleBefore}{' '}
+              <span className="text-[#E36630]">{content.titleHighlight}</span>
             </h2>
 
-            <div className="w-16 h-1 bg-[#E36630] rounded-full mb-6" />
+            <div className="mb-6 h-1 w-16 rounded-full bg-[#E36630]" />
 
-            <div className="space-y-4 text-gray-500 text-base leading-relaxed">
-              <p>
-                Ambassador is a trusted provider of commercial kitchen equipment and professional food service solutions in Pakistan. With more than 15 years of industry experience, we specialize in supplying high-quality equipment sourced from leading international brands.
-              </p>
-              <p>
-                Our company supports restaurants, hotels, bakeries, cafés, supermarkets, and institutional kitchens with reliable, efficient equipment designed to meet modern culinary and operational demands — from cooking ranges and refrigeration systems to stainless steel workstations.
-              </p>
-              <p>
-                At Ambassador, our goal is to help businesses build fully functional, durable kitchen environments, backed by dependable service and practical solutions that keep operations running at the highest standard.
-              </p>
+            <div className="space-y-4 text-base leading-relaxed text-gray-500">
+              {content.paragraphs.map((p) => (
+                <p key={p.slice(0, 24)}>{p}</p>
+              ))}
             </div>
 
-            {/* Mini stats row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10 pt-8 border-t border-gray-100">
-              {highlights.map((item) => (
+            <div className="mt-10 grid grid-cols-2 gap-4 border-t border-gray-100 pt-8 sm:grid-cols-4">
+              {content.highlights.map((item) => (
                 <div key={item.label} className="text-center lg:text-left">
                   <p className="text-2xl font-bold text-[#E36630]">{item.value}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 leading-snug">{item.label}</p>
+                  <p className="mt-0.5 text-xs leading-snug text-gray-500">{item.label}</p>
                 </div>
               ))}
             </div>
           </div>
-
         </div>
       </div>
     </section>

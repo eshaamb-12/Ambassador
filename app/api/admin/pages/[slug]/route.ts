@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/backend/lib/adminAuth';
 import {
+  getAboutPageConfig,
   getHomePageConfig,
   isManagedPageSlug,
+  saveAboutPageConfig,
   saveHomePageConfig,
 } from '@/backend/lib/loadSitePage';
+import { aboutPageConfigForSave } from '@/lib/aboutPageConfig.util';
 import { homePageConfigForSave } from '@/lib/homePageConfig.util';
+import type { AboutPageConfig } from '@/lib/aboutPage.types';
 import type { HomePageConfig } from '@/lib/sitePages.types';
 
 export const dynamic = 'force-dynamic';
@@ -26,6 +30,10 @@ export async function GET(
   try {
     if (slug === 'home') {
       const data = await getHomePageConfig();
+      return NextResponse.json({ success: true, data }, { status: 200 });
+    }
+    if (slug === 'about') {
+      const data = await getAboutPageConfig();
       return NextResponse.json({ success: true, data }, { status: 200 });
     }
     return NextResponse.json({ success: false, message: 'Not implemented.' }, { status: 501 });
@@ -54,6 +62,13 @@ export async function PATCH(
       const saved = await saveHomePageConfig(homePageConfigForSave(body as HomePageConfig));
       return NextResponse.json(
         { success: true, message: 'Home page saved.', data: saved },
+        { status: 200 },
+      );
+    }
+    if (slug === 'about') {
+      const saved = await saveAboutPageConfig(aboutPageConfigForSave(body as AboutPageConfig));
+      return NextResponse.json(
+        { success: true, message: 'About page saved.', data: saved },
         { status: 200 },
       );
     }

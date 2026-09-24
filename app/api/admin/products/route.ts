@@ -12,9 +12,17 @@ import {
   sanitizeProductBrands,
 } from '@/backend/lib/productMarketingFields';
 import { requireAdmin, requireFullAdmin, rejectManagerStatusChange } from '@/backend/lib/adminAuth';
-import { applyProductTypeFilter } from '@/backend/lib/productTypeFilters';
+import {
+  buildAdminProductListFilter,
+  fuzzyAdminProductIds,
+  normalizeAdminSearchQuery,
+  rankProductCandidatesBySearch,
+  sortProductsByIdOrder,
+} from '@/backend/lib/adminProductSearch';
 import { parseWeightKg } from '@/lib/shippingQuote';
 import mongoose from 'mongoose';
+
+const FUZZY_CANDIDATE_CAP = 4000;
 
 const ADMIN_PAGE_LIMIT = 10;
 
@@ -44,61 +52,85 @@ export async function GET(req: NextRequest) {
     const limit      = Math.min(50, parseInt(searchParams.get('limit') ?? String(ADMIN_PAGE_LIMIT), 10));
     const skip       = (page - 1) * limit;
 
-    const filter: Record<string, unknown> = {};
-    const trimmedSearch = search.trim();
-    if (trimmedSearch) {
-      const orConditions: Record<string, unknown>[] = [
-        { name: { $regex: trimmedSearch, $options: 'i' } },
-        { slug: { $regex: trimmedSearch, $options: 'i' } },
-      ];
+    const trimmedSearch = normalizeAdminSearchQuery(search);
+    const searchActive = trimmedSearch.length >= 2;
 
-      if (
-        mongoose.Types.ObjectId.isValid(trimmedSearch) &&
-        String(new mongoose.Types.ObjectId(trimmedSearch)) === trimmedSearch
-      ) {
-        orConditions.push({ _id: new mongoose.Types.ObjectId(trimmedSearch) });
-      } else if (/^[a-f0-9]{4,24}$/i.test(trimmedSearch)) {
-        orConditions.push({
-          $expr: {
-            $regexMatch: {
-              input: { $toString: '$_id' },
-              regex: trimmedSearch,
-              options: 'i',
-            },
-          },
-        });
+    const filter = buildAdminProductListFilter({
+      search: trimmedSearch,
+      productType,
+      status,
+      stock,
+      categoryId,
+      categoryIdsParam,
+      ignoreCategory: searchActive,
+    });
+
+    const baseFilterWithoutSearch = buildAdminProductListFilter({
+      productType,
+      status,
+      stock,
+      categoryId,
+      categoryIdsParam,
+      ignoreCategory: searchActive,
+    });
+
+    type AdminProductRow = { _id: unknown; name?: string; slug?: string; [key: string]: unknown };
+    let products: AdminProductRow[] = [];
+    let total: number;
+
+    const ratingsPromise = Review.aggregate([
+      { $match: { status: 'approved' } },
+      { $group: { _id: '$productId', avgRating: { $avg: '$rating' }, reviewCount: { $sum: 1 } } },
+    ]);
+
+    if (searchActive) {
+      const strictTotal = await Product.countDocuments(filter);
+      let ranked: { ids: mongoose.Types.ObjectId[]; total: number };
+
+      if (strictTotal > 0) {
+        const candidates = await Product.find(filter, { name: 1, slug: 1 })
+          .limit(FUZZY_CANDIDATE_CAP)
+          .lean();
+        ranked = rankProductCandidatesBySearch(trimmedSearch, candidates, skip, limit);
+      } else {
+        ranked = await fuzzyAdminProductIds(
+          (baseFilter) =>
+            Product.find(baseFilter, { name: 1, slug: 1 }).limit(FUZZY_CANDIDATE_CAP).lean(),
+          baseFilterWithoutSearch,
+          trimmedSearch,
+          skip,
+          limit,
+        );
       }
 
-      filter.$or = orConditions;
-    }
-    if (status !== 'all') filter.status = status;
-    applyProductTypeFilter(filter, productType);
-    if (categoryIdsParam) {
-      const ids = categoryIdsParam
-        .split(',')
-        .map((id) => id.trim())
-        .filter((id) => mongoose.Types.ObjectId.isValid(id));
-      if (ids.length) filter.categories = { $in: ids.map((id) => new mongoose.Types.ObjectId(id)) };
-    } else if (categoryId) {
-      filter.categories = categoryId;
-    }
-    if (stock === 'in_stock') filter.stock = { $gt: 0 };
-    if (stock === 'out_of_stock') filter.stock = { $lte: 0 };
-
-    // Fetch products, total count, and ratings all in parallel
-    const [products, total, ratings] = await Promise.all([
-      Product.find(filter, ADMIN_LIST_PROJECTION)
+      total = ranked.total;
+      if (ranked.ids.length === 0) {
+        products = [];
+      } else {
+        const found = await Product.find({ _id: { $in: ranked.ids } }, ADMIN_LIST_PROJECTION)
+          .populate('categories', 'title')
+          .lean();
+        products = sortProductsByIdOrder(found, ranked.ids) as unknown as AdminProductRow[];
+      }
+    } else if (trimmedSearch.length === 1) {
+      total = await Product.countDocuments(filter);
+      products = (await Product.find(filter, ADMIN_LIST_PROJECTION)
         .populate('categories', 'title')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .lean(),
-      Product.countDocuments(filter),
-      Review.aggregate([
-        { $match: { status: 'approved' } },
-        { $group: { _id: '$productId', avgRating: { $avg: '$rating' }, reviewCount: { $sum: 1 } } },
-      ]),
-    ]);
+        .lean()) as unknown as AdminProductRow[];
+    } else {
+      total = await Product.countDocuments(filter);
+      products = (await Product.find(filter, ADMIN_LIST_PROJECTION)
+        .populate('categories', 'title')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()) as unknown as AdminProductRow[];
+    }
+
+    const ratings = await ratingsPromise;
 
     const ratingMap: Record<string, { avgRating: number; reviewCount: number }> = {};
     for (const r of ratings) ratingMap[String(r._id)] = { avgRating: r.avgRating, reviewCount: r.reviewCount };

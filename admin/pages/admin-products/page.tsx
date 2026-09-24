@@ -123,6 +123,7 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
   const [total,        setTotal]       = useState(0);
   const [totalPages,   setTotalPages]  = useState(0);
   const [loading,      setLoading]     = useState(true);
+  const [searchInput,  setSearchInput] = useState('');
   const [searchTerm,   setSearchTerm]  = useState('');
   const [filterCat,    setFilterCat]   = useState('all');
   const [filterStatus, setFilterStatus]= useState('all');
@@ -155,10 +156,12 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
       params.set('page',  String(page));
       params.set('limit', String(ADMIN_PAGE_SIZE));
       params.set('productType', catalogUi.productType);
-      if (searchTerm.trim())      params.set('search',   searchTerm.trim());
-      if (filterStatus !== 'all') params.set('status',   filterStatus);
-      if (filterStock  !== 'all') params.set('stock',    filterStock);
-      if (filterCat    !== 'all') params.set('category', filterCat);
+      const activeSearch = searchTerm.trim();
+      if (activeSearch) params.set('search', activeSearch);
+      if (filterStatus !== 'all') params.set('status', filterStatus);
+      if (filterStock  !== 'all') params.set('stock', filterStock);
+      // While searching, look across all categories (category filter still shown in UI).
+      if (filterCat !== 'all' && activeSearch.length < 2) params.set('category', filterCat);
 
       const res  = await fetch(`/api/admin/products?${params.toString()}`, { credentials: 'include' });
       const data = await res.json();
@@ -173,6 +176,11 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
       setLoading(false);
     }
   }, [searchTerm, filterCat, filterStatus, filterStock, catalogUi.productType]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchTerm(searchInput.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Fetch categories once
   useEffect(() => {
@@ -397,8 +405,8 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <input type="text" placeholder="Search by name, slug, or product ID…" value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+              <input type="text" placeholder="Search by name, slug, or product ID…" value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:ring-2 focus:ring-[#0F4C69]/30 focus:border-[#0F4C69]" />
             </div>
             <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
@@ -419,6 +427,11 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
               <option value="out_of_stock">Out of Stock</option>
             </select>
           </div>
+          {searchTerm.trim().length >= 2 && filterCat !== 'all' && (
+            <p className="text-xs text-[#0F4C69]">
+              Search looks in all categories while you type. Clear the search box to use the category filter again.
+            </p>
+          )}
 
           <div className="space-y-4 border-t border-gray-100 pt-4">
             <div>

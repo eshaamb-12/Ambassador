@@ -79,7 +79,10 @@ const AdminSettingsPage = () => {
 
   useEffect(() => {
     const section = new URLSearchParams(window.location.search).get('section');
-    if (section && ['general', 'company', 'notifications', 'security', 'payment', 'email'].includes(section)) {
+    if (
+      section &&
+      ['general', 'company', 'notifications', 'security', 'payment', 'email'].includes(section)
+    ) {
       setActiveSection(section);
     }
   }, []);
@@ -121,7 +124,7 @@ const AdminSettingsPage = () => {
       title: 'Email Configuration',
       description: 'SMTP and email settings',
       icon: 'email'
-    }
+    },
   ];
 
   // Settings data
@@ -800,7 +803,6 @@ const AdminSettingsPage = () => {
                 {renderSectionContent()}
               </div>
 
-              {/* Save Button */}
               <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
                 <div className="flex items-center justify-between">
                   <div>

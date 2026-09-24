@@ -25,6 +25,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
     pathname?.startsWith('/gallery-management') ||
     pathname?.startsWith('/reviews-management') ||
     pathname?.startsWith('/admin-settings') ||
+    pathname?.startsWith('/seo-tracking') ||
     pathname?.startsWith('/payments-management') ||
     pathname?.startsWith('/spare-parts-management') ||
     pathname?.startsWith('/careers-management') ||

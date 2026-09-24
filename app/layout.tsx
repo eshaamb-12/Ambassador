@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LayoutWrapper from "@/components/common/LayoutWrapper";
@@ -7,6 +6,9 @@ import { UserProvider } from "@/contexts/UserContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { getPublicSiteSettings } from "@/backend/lib/loadSiteSettings";
+import SiteTracking from "@/components/site/SiteTracking";
+import SiteHeadInjection from "@/components/site/SiteHeadInjection";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,43 +20,38 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getSiteUrl()),
-  title: {
-    default: 'Ambassador Commercial Kitchen',
-    template: '%s | Ambassador Commercial Kitchen',
-  },
-  description:
-    'Commercial kitchen equipment and professional food service solutions in Pakistan.',
-  verification: {
-    google: 'E2JREt5YU1IkSxG6kQBwwW4FrD9JKQjwz43hJkrNF78',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tracking = await getPublicSiteSettings();
+  const verification = tracking.googleSiteVerification.trim();
 
-const GA_MEASUREMENT_ID = 'G-Y951ZNMJX9';
+  return {
+    metadataBase: new URL(getSiteUrl()),
+    title: {
+      default: 'Ambassador Commercial Kitchen',
+      template: '%s | Ambassador Commercial Kitchen',
+    },
+    description:
+      'Commercial kitchen equipment and professional food service solutions in Pakistan.',
+    ...(verification
+      ? { verification: { google: verification } }
+      : {}),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const tracking = await getPublicSiteSettings();
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
-          `}
-        </Script>
+        <SiteHeadInjection html={tracking.headExtraHtml} />
+        <SiteTracking settings={tracking} />
         <CartProvider>
           <UserProvider>
             <WishlistProvider>

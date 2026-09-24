@@ -11,7 +11,10 @@ if (!env.NEXT_DIST_DIR) {
   delete env.NEXT_DIST_DIR;
 }
 
-const result = spawnSync('next', ['dev', ...process.argv.slice(2)], {
+// Webpack dev avoids Turbopack route-table bugs (e.g. /login, /signup → 404 on Windows).
+const devArgs = ['dev', '--webpack', ...process.argv.slice(2).filter((a) => a !== '--turbo' && a !== '--turbopack')];
+
+const result = spawnSync('next', devArgs, {
   stdio: 'inherit',
   env,
   shell: process.platform === 'win32',

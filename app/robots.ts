@@ -12,6 +12,7 @@ const DISALLOW_PREFIXES = [
   '/blog-management',
   '/reviews-management',
   '/admin-settings',
+  '/seo-tracking',
   '/payments-management',
   '/payments',
   '/users',

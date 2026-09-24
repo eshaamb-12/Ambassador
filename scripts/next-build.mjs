@@ -4,6 +4,10 @@
  * with: TypeError: Cannot read properties of null (reading 'useState')
  */
 import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const nextBin = require.resolve('next/dist/bin/next');
 
 const env = { ...process.env };
 
@@ -16,10 +20,12 @@ if (env.NODE_ENV && env.NODE_ENV !== 'production') {
 env.NODE_ENV = 'production';
 delete env.NEXT_DIST_DIR;
 
-const result = spawnSync('next', ['build'], {
+// Webpack build — Turbopack production builds panic on PostCSS/Tailwind (globals.css) on Vercel/Linux.
+const buildArgs = ['build', '--webpack'];
+
+const result = spawnSync(process.execPath, [nextBin, ...buildArgs], {
   stdio: 'inherit',
   env,
-  shell: process.platform === 'win32',
 });
 
 process.exit(result.status ?? 1);

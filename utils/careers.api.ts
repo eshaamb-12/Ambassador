@@ -8,7 +8,7 @@ export interface JobApplicationData {
   city: string;
   experience?: string;
   linkedIn?: string;
-  coverLetter: string;
+  resume: File;
 }
 
 export interface JobApplicationResponse {
@@ -18,10 +18,21 @@ export interface JobApplicationResponse {
 }
 
 export async function submitJobApplication(data: JobApplicationData): Promise<JobApplicationResponse> {
+  const fd = new FormData();
+  fd.append('jobId', data.jobId);
+  fd.append('jobSlug', data.jobSlug);
+  fd.append('jobTitle', data.jobTitle);
+  fd.append('name', data.name);
+  fd.append('email', data.email);
+  fd.append('phone', data.phone);
+  fd.append('city', data.city);
+  if (data.experience) fd.append('experience', data.experience);
+  if (data.linkedIn) fd.append('linkedIn', data.linkedIn);
+  fd.append('resume', data.resume);
+
   const res = await fetch('/api/careers/apply', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: fd,
   });
 
   const json = (await res.json()) as JobApplicationResponse;

@@ -6,6 +6,14 @@ function resetTransporter(): void {
   cachedTransporter = null;
 }
 
+/** True when outbound email can be sent (SMTP_* env vars set). */
+export function isSmtpConfigured(): boolean {
+  const host = process.env.SMTP_HOST?.trim();
+  const user = process.env.SMTP_USER?.trim();
+  const pass = (process.env.SMTP_PASS ?? '').trim();
+  return Boolean(host && user && pass);
+}
+
 /** Gmail-compatible SMTP transport (trimmed credentials, TLS on 587). */
 function getTransporter(): Transporter {
   if (cachedTransporter) return cachedTransporter;
@@ -732,11 +740,25 @@ export interface JobApplicationPayload {
   city: string;
   experience?: string;
   linkedIn?: string;
-  coverLetter: string;
+  resumeUrl?: string;
+  resumeFileName: string;
 }
 
-/** Notify HR inbox about a job application. */
-export async function sendJobApplicationInquiryEmail(payload: JobApplicationPayload): Promise<void> {
+export type JobApplicationResumeAttachment = {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+};
+
+/** Notify HR inbox about a job application. No-op when SMTP is not configured. */
+export async function sendJobApplicationInquiryEmail(
+  payload: JobApplicationPayload,
+  resume?: JobApplicationResumeAttachment,
+): Promise<void> {
+  if (!isSmtpConfigured()) {
+    console.warn('[sendJobApplicationInquiryEmail] SMTP not configured; skipping HR email.');
+    return;
+  }
   const transporter = getTransporter();
   const fromName = process.env.SMTP_FROM_NAME ?? 'Ambassador Commercial Kitchen Equipment';
   const fromEmail = process.env.SMTP_USER!;
@@ -753,7 +775,12 @@ export async function sendJobApplicationInquiryEmail(payload: JobApplicationPayl
   const linkedInSafe = payload.linkedIn
     ? `<a href="${escapeHtmlForEmail(payload.linkedIn)}" style="color:#0F4C69;">${escapeHtmlForEmail(payload.linkedIn)}</a>`
     : '—';
-  const coverSafe = escapeHtmlForEmail(payload.coverLetter).replace(/\n/g, '<br/>');
+  const resumeNameSafe = escapeHtmlForEmail(payload.resumeFileName);
+  const resumeLinkSafe = payload.resumeUrl
+    ? `<a href="${escapeHtmlForEmail(payload.resumeUrl)}" style="color:#0F4C69;">Download resume</a>`
+    : resume
+      ? `${resumeNameSafe} (attached to this email)`
+      : '—';
 
   const body = `
     <h2 style="margin:0 0 8px;color:#1a1a1a;font-size:22px;font-weight:700;">
@@ -803,8 +830,8 @@ export async function sendJobApplicationInquiryEmail(payload: JobApplicationPayl
         <td style="padding:10px 0;border-bottom:1px solid #eee;">${linkedInSafe}</td>
       </tr>
       <tr>
-        <td style="padding:10px 0;font-weight:600;vertical-align:top;">Cover Letter</td>
-        <td style="padding:10px 0;line-height:1.7;">${coverSafe}</td>
+        <td style="padding:10px 0;font-weight:600;vertical-align:top;">Resume / CV</td>
+        <td style="padding:10px 0;line-height:1.7;">${resumeLinkSafe}</td>
       </tr>
     </table>
   `;
@@ -815,11 +842,21 @@ export async function sendJobApplicationInquiryEmail(payload: JobApplicationPayl
     replyTo: payload.email,
     subject: `Job Application: ${payload.jobTitle} — ${payload.name}`,
     html: baseTemplate('New Job Application', body),
+    attachments: resume
+      ? [
+          {
+            filename: resume.filename,
+            content: resume.content,
+            contentType: resume.contentType,
+          },
+        ]
+      : undefined,
   });
 }
 
-/** Auto-reply confirming receipt of job application. */
+/** Auto-reply confirming receipt of job application. No-op when SMTP is not configured. */
 export async function sendJobApplicationConfirmationEmail(payload: JobApplicationPayload): Promise<void> {
+  if (!isSmtpConfigured()) return;
   const transporter = getTransporter();
   const fromName = process.env.SMTP_FROM_NAME ?? 'Ambassador Commercial Kitchen Equipment';
   const fromEmail = process.env.SMTP_USER!;

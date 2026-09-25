@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CareerJob } from '@/lib/careers.types';
 import { submitJobApplication } from '@/utils/careers.api';
 
@@ -12,6 +12,9 @@ interface JobApplicationModalProps {
 const inputClass =
   'w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#0F4C69] focus:outline-none focus:ring-2 focus:ring-[#0F4C69]/20';
 
+const ACCEPTED_RESUME =
+  '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
 const JobApplicationModal = ({ job, onClose }: JobApplicationModalProps) => {
   const [form, setForm] = useState({
     name: '',
@@ -20,8 +23,10 @@ const JobApplicationModal = ({ job, onClose }: JobApplicationModalProps) => {
     city: '',
     experience: '',
     linkedIn: '',
-    coverLetter: '',
   });
+  const [resume, setResume] = useState<File | null>(null);
+  const [resumeError, setResumeError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
@@ -36,8 +41,10 @@ const JobApplicationModal = ({ job, onClose }: JobApplicationModalProps) => {
       city: '',
       experience: '',
       linkedIn: '',
-      coverLetter: '',
     });
+    setResume(null);
+    setResumeError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
     setErrors({});
     setMessage('');
     setIsError(false);
@@ -64,12 +71,51 @@ const JobApplicationModal = ({ job, onClose }: JobApplicationModalProps) => {
     if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }));
   };
 
+  const onResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setResumeError('');
+    if (errors.resume) setErrors((prev) => ({ ...prev, resume: '' }));
+
+    if (!file) {
+      setResume(null);
+      return;
+    }
+
+    const allowedMime = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const allowedExt = ['pdf', 'doc', 'docx'];
+    if (!allowedMime.includes(file.type) && !allowedExt.includes(ext)) {
+      setResume(null);
+      setResumeError('Please upload a PDF or Word file (.pdf, .doc, .docx).');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setResume(null);
+      setResumeError('File must be 5 MB or smaller.');
+      e.target.value = '';
+      return;
+    }
+    setResume(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setMessage('');
     setIsError(false);
     setErrors({});
+    setResumeError('');
+
+    if (!resume) {
+      setResumeError('Please upload your resume or CV.');
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const result = await submitJobApplication({
@@ -82,7 +128,7 @@ const JobApplicationModal = ({ job, onClose }: JobApplicationModalProps) => {
         city: form.city.trim(),
         experience: form.experience.trim() || undefined,
         linkedIn: form.linkedIn.trim() || undefined,
-        coverLetter: form.coverLetter.trim(),
+        resume,
       });
       setMessage(result.message);
     } catch (err) {
@@ -222,18 +268,22 @@ const JobApplicationModal = ({ job, onClose }: JobApplicationModalProps) => {
               </div>
               <div className="sm:col-span-2">
                 <label className="mb-1.5 block text-xs font-semibold text-gray-700">
-                  Cover Letter <span className="text-red-500">*</span>
+                  Upload resume / CV <span className="text-red-500">*</span>
                 </label>
-                <textarea
-                  value={form.coverLetter}
-                  onChange={(e) => update('coverLetter', e.target.value)}
-                  rows={5}
-                  className={`${inputClass} resize-y min-h-[120px]`}
-                  placeholder="Tell us why you're a good fit for this role..."
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPTED_RESUME}
+                  onChange={onResumeChange}
+                  className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#0F4C69]/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#0F4C69] hover:file:bg-[#0F4C69]/15"
                   required
                 />
-                {errors.coverLetter ? (
-                  <p className="mt-1 text-xs text-red-600">{errors.coverLetter}</p>
+                <p className="mt-1.5 text-xs text-gray-500">PDF or Word, max 5 MB</p>
+                {resume ? (
+                  <p className="mt-1 text-xs font-medium text-gray-700">{resume.name}</p>
+                ) : null}
+                {resumeError || errors.resume ? (
+                  <p className="mt-1 text-xs text-red-600">{resumeError || errors.resume}</p>
                 ) : null}
               </div>
             </div>

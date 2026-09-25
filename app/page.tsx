@@ -3,6 +3,9 @@ import HomePage from '../client/pages/home/HomePage';
 import { canonicalMetadata } from '@/lib/siteUrl';
 import { getHomePageConfig } from '@/backend/lib/loadSitePage';
 
+/** CMS content must be read from Mongo on each request — not baked in at build time. */
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Ambassador Commercial Kitchen Equipment | Commercial Kitchen Equipment Pakistan',
   description:

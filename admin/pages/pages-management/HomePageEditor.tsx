@@ -50,7 +50,7 @@ export default function HomePageEditor({ initialConfig }: HomePageEditorProps) {
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to save.');
       if (json.data) setConfig(mergeHomePageConfig(json.data));
       dirtyRef.current = false;
-      setMessage('Home page saved. Refresh the live site to see your changes.');
+      setMessage('Home page saved. Changes are live on the storefront.');
       setTimeout(() => setMessage(''), 5000);
     } catch (e) {
       setError((e as Error).message);

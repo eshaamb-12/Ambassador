@@ -43,7 +43,7 @@ export default function AboutPageEditor({ initialConfig }: AboutPageEditorProps)
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to save.');
       if (json.data) setConfig(mergeAboutPageConfig(json.data));
       dirtyRef.current = false;
-      setMessage('About page saved. Refresh the live site to see your changes.');
+      setMessage('About page saved. Changes are live on the storefront.');
       setTimeout(() => setMessage(''), 5000);
     } catch (e) {
       setError((e as Error).message);

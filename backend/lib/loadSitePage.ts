@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from 'next/cache';
 import connectDB from '@/backend/config/db';
 import SitePage from '@/backend/models/SitePage.model';
 import { mergeAboutPageConfig } from '@/lib/aboutPageConfig.util';
@@ -10,6 +11,7 @@ export function isManagedPageSlug(slug: string): slug is ManagedPageSlug {
 }
 
 export async function getHomePageConfig(): Promise<HomePageConfig> {
+  noStore();
   try {
     await connectDB();
     const doc = await SitePage.findOne({ slug: 'home' }).lean();
@@ -34,6 +36,7 @@ export async function saveHomePageConfig(config: HomePageConfig): Promise<HomePa
 }
 
 export async function getAboutPageConfig(): Promise<AboutPageConfig> {
+  noStore();
   try {
     await connectDB();
     const doc = await SitePage.findOne({ slug: 'about' }).lean();

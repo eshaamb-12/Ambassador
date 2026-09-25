@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/backend/lib/adminAuth';
 import {
@@ -60,6 +61,8 @@ export async function PATCH(
     const body = await req.json();
     if (slug === 'home') {
       const saved = await saveHomePageConfig(homePageConfigForSave(body as HomePageConfig));
+      revalidatePath('/');
+      revalidatePath('/api/pages/home');
       return NextResponse.json(
         { success: true, message: 'Home page saved.', data: saved },
         { status: 200 },
@@ -67,6 +70,8 @@ export async function PATCH(
     }
     if (slug === 'about') {
       const saved = await saveAboutPageConfig(aboutPageConfigForSave(body as AboutPageConfig));
+      revalidatePath('/about');
+      revalidatePath('/api/pages/about');
       return NextResponse.json(
         { success: true, message: 'About page saved.', data: saved },
         { status: 200 },

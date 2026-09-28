@@ -9,6 +9,7 @@ import { getSiteUrl } from "@/lib/siteUrl";
 import { getPublicSiteSettings } from "@/backend/lib/loadSiteSettings";
 import SiteTracking from "@/components/site/SiteTracking";
 import SiteHeadInjection from "@/components/site/SiteHeadInjection";
+import MetaPixel from "@/components/site/MetaPixel";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <MetaPixel />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

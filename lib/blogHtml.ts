@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify';
+import sanitizeHtml from 'sanitize-html';
 
 const ALLOWED_TAGS = [
   'p',
@@ -20,17 +20,19 @@ const ALLOWED_TAGS = [
   'span',
 ];
 
-const ALLOWED_ATTR = ['href', 'target', 'rel', 'class', 'id'];
-
 /** Sanitize admin-authored HTML before storing or rendering on the storefront. */
 export function sanitizeBlogHtml(html: string): string {
   const trimmed = html.trim();
   if (!trimmed) return '';
 
-  return DOMPurify.sanitize(trimmed, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    ALLOW_DATA_ATTR: false,
+  return sanitizeHtml(trimmed, {
+    allowedTags: ALLOWED_TAGS,
+    allowedAttributes: {
+      '*': ['class', 'id'],
+      a: ['href', 'target', 'rel', 'class', 'id'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+    allowProtocolRelative: false,
   });
 }
 

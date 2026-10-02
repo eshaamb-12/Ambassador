@@ -29,7 +29,6 @@
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "google-auth-library": "^10.6.2",
-    "isomorphic-dompurify": "^4.4.0",
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
@@ -39,6 +38,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.8.1",
+    "sanitize-html": "^2.18.0",
     "tailwind-merge": "^3.6.0",
     "xlsx": "^0.18.5"
   },
@@ -49,6 +49,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.2",
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",

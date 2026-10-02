@@ -9,6 +9,7 @@ export interface IBlogPost extends Document {
   coverImagePublicId?: string;
   author: string;
   category?: string;
+  tags: string[];
   status: 'active' | 'inactive';
   publishedAt: Date;
   createdAt: Date;
@@ -62,6 +63,10 @@ const blogPostSchema = new Schema<IBlogPost>(
       trim: true,
       maxlength: [80, 'Category cannot exceed 80 characters'],
     },
+    tags: {
+      type: [String],
+      default: [],
+    },
     status: {
       type: String,
       enum: ['active', 'inactive'],
@@ -75,19 +80,22 @@ const blogPostSchema = new Schema<IBlogPost>(
   { timestamps: true, collection: 'blogposts' },
 );
 
+/** Slug is set by admin (permalink) or API on create — do not overwrite when title changes. */
 blogPostSchema.pre('save', async function () {
-  if (this.isModified('title') || !this.slug) {
-    const base = this.title
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-');
+  if (this.slug?.trim()) return;
 
-    const BlogPostModel =
-      mongoose.models.BlogPost ?? mongoose.model('BlogPost', blogPostSchema, 'blogposts');
-    const existing = await BlogPostModel.findOne({ slug: base, _id: { $ne: this._id } });
-    this.slug = existing ? `${base}-${Date.now().toString(36)}` : base;
-  }
+  const base = this.title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  const BlogPostModel =
+    mongoose.models.BlogPost ?? mongoose.model('BlogPost', blogPostSchema, 'blogposts');
+  const candidate = base || `post-${Date.now().toString(36)}`;
+  const existing = await BlogPostModel.findOne({ slug: candidate, _id: { $ne: this._id } });
+  this.slug = existing ? `${candidate}-${Date.now().toString(36)}` : candidate;
 });
 
 blogPostSchema.index({ status: 1, publishedAt: -1 });

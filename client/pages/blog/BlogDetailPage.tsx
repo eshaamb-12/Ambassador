@@ -4,9 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import BlogArticleBody from '@/components/blog/BlogArticleBody';
+import BlogArticleHtmlBody from '@/components/blog/BlogArticleHtmlBody';
 import BlogArticleSidebar from '@/components/blog/BlogArticleSidebar';
 import SignupBanner from '@/components/common/signup-banner';
 import { extractBlogHeadings, parseBlogContent } from '@/lib/blogContent';
+import { extractHeadingsFromBlogHtml, isBlogHtmlContent } from '@/lib/blogHtml';
 import { formatBlogDate } from '@/lib/blogDisplay';
 import type { BlogPost } from '@/lib/blog.types';
 import { blogDetailPath, BLOG_PATH } from '@/lib/siteRoutes';
@@ -20,8 +22,15 @@ type BlogDetailPageProps = {
 
 const BlogDetailPage = ({ post }: BlogDetailPageProps) => {
   const cover = post.coverImage?.trim() || FALLBACK_COVER;
-  const blocks = useMemo(() => parseBlogContent(post.content), [post.content]);
-  const headings = useMemo(() => extractBlogHeadings(blocks), [blocks]);
+  const isHtml = useMemo(() => isBlogHtmlContent(post.content), [post.content]);
+  const blocks = useMemo(
+    () => (isHtml ? [] : parseBlogContent(post.content)),
+    [isHtml, post.content],
+  );
+  const headings = useMemo(() => {
+    if (isHtml) return extractHeadingsFromBlogHtml(post.content);
+    return extractBlogHeadings(blocks);
+  }, [isHtml, post.content, blocks]);
 
   const shareUrl = absoluteUrl(blogDetailPath(post.slug));
 
@@ -39,11 +48,21 @@ const BlogDetailPage = ({ post }: BlogDetailPageProps) => {
 
           <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div className="min-w-0">
-              {post.category ? (
-                <span className="inline-flex rounded-full bg-[#0F4C69]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#0F4C69]">
-                  {post.category}
-                </span>
-              ) : null}
+              <div className="flex flex-wrap items-center gap-2">
+                {post.category ? (
+                  <span className="inline-flex rounded-full bg-[#0F4C69]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-[#0F4C69]">
+                    {post.category}
+                  </span>
+                ) : null}
+                {(post.tags ?? []).map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-[11px] font-semibold text-gray-600"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
               <h1 className="mt-4 text-2xl font-bold leading-tight text-gray-900 md:text-4xl lg:text-[2.75rem]">
                 {post.title}
               </h1>
@@ -79,7 +98,7 @@ const BlogDetailPage = ({ post }: BlogDetailPageProps) => {
       <section className="container mx-auto px-4 py-10 md:py-14">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
           <article className="min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8 lg:col-span-8">
-            <BlogArticleBody blocks={blocks} />
+            {isHtml ? <BlogArticleHtmlBody html={post.content} /> : <BlogArticleBody blocks={blocks} />}
 
             <div className="mt-10 flex flex-wrap gap-3 border-t border-gray-100 pt-8">
               <Link

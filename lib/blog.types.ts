@@ -16,6 +16,7 @@ export type BlogPost = {
   coverImagePublicId?: string;
   author: string;
   category?: string;
+  tags: string[];
   status: BlogPostStatus;
   publishedAt: string;
   readTimeMinutes: number;

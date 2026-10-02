@@ -18,6 +18,10 @@
     "create:manager:reset": "npx ts-node --project tsconfig.seed.json backend/seeds/admin.seed.ts -- --manager-only --reset-manager-password"
   },
   "dependencies": {
+    "@tiptap/extension-link": "^3.31.4",
+    "@tiptap/pm": "^3.31.4",
+    "@tiptap/react": "^3.31.4",
+    "@tiptap/starter-kit": "^3.31.4",
     "@types/busboy": "^1.5.4",
     "@types/nodemailer": "^8.0.0",
     "bcryptjs": "^3.0.3",
@@ -25,6 +29,7 @@
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
     "google-auth-library": "^10.6.2",
+    "isomorphic-dompurify": "^4.4.0",
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",

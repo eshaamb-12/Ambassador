@@ -16,6 +16,9 @@ export function toBlogPost(doc: BlogPostDoc): BlogPost {
     coverImagePublicId: row.coverImagePublicId?.trim() || undefined,
     author: row.author?.trim() || 'Ambassador Team',
     category: row.category?.trim() || undefined,
+    tags: Array.isArray(row.tags)
+      ? row.tags.map((t) => String(t).trim()).filter(Boolean)
+      : [],
     status: row.status === 'inactive' ? 'inactive' : 'active',
     publishedAt: new Date(row.publishedAt).toISOString(),
     readTimeMinutes: estimateReadMinutes(row.content),

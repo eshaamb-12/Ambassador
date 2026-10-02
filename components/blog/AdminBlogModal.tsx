@@ -8,19 +8,25 @@ import {
   initMediaSlot,
   type AdminMediaSlot,
 } from '@/utils/adminMediaSlot';
+import BlogRichTextEditor from '@/components/blog/BlogRichTextEditor';
+import BlogTagsInput from '@/components/blog/BlogTagsInput';
 import {
   BLOG_CATEGORY_MAX,
   BLOG_EXCERPT_MAX,
   BLOG_TITLE_MAX,
   type BlogPost,
 } from '@/lib/blog.types';
+import { normalizeBlogSlug, slugFromBlogTitle } from '@/lib/blogSlug';
+import { BLOG_PATH } from '@/lib/siteRoutes';
 
 export type AdminBlogForm = {
   title: string;
+  slug: string;
   excerpt: string;
   content: string;
   author: string;
   category: string;
+  tags: string[];
   status: 'active' | 'inactive';
   publishedAt: string;
 };
@@ -34,10 +40,12 @@ export function emptyBlogForm(): AdminBlogForm {
   const today = new Date().toISOString().slice(0, 10);
   return {
     title: '',
+    slug: '',
     excerpt: '',
-    content: '',
+    content: '<p></p>',
     author: 'Ambassador Team',
     category: '',
+    tags: [],
     status: 'active',
     publishedAt: today,
   };
@@ -46,10 +54,12 @@ export function emptyBlogForm(): AdminBlogForm {
 export function blogToForm(post: BlogPost): AdminBlogForm {
   return {
     title: post.title,
+    slug: post.slug,
     excerpt: post.excerpt,
     content: post.content,
     author: post.author,
     category: post.category ?? '',
+    tags: post.tags ?? [],
     status: post.status,
     publishedAt: post.publishedAt.slice(0, 10),
   };
@@ -68,6 +78,7 @@ type AdminBlogModalProps = {
   canChangeStatus: boolean;
   /** Preset + categories already used on other posts (for datalist suggestions). */
   categorySuggestions: string[];
+  tagSuggestions: string[];
 };
 
 /** Blog cards/detail never need full 1920px — smaller file uploads faster. */
@@ -85,6 +96,7 @@ export default function AdminBlogModal({
   onSave,
   canChangeStatus,
   categorySuggestions,
+  tagSuggestions,
 }: AdminBlogModalProps) {
   const [coverSlot, setCoverSlot] = useState<AdminMediaSlot>(emptyMediaSlot());
   const [coverUploadPct, setCoverUploadPct] = useState<number | null>(null);
@@ -219,7 +231,8 @@ export default function AdminBlogModal({
       setLocalError('Excerpt is required.');
       return;
     }
-    if (!form.content.trim()) {
+    const contentPlain = form.content.replace(/<[^>]+>/g, ' ').trim();
+    if (!contentPlain) {
       setLocalError('Content is required.');
       return;
     }
@@ -244,12 +257,20 @@ export default function AdminBlogModal({
       const cover = await resolveCoverForSave();
       setUploadStatus('Saving post…');
 
+      const slug = normalizeBlogSlug(form.slug.trim() || slugFromBlogTitle(form.title));
+      if (!slug) {
+        setLocalError('Permalink is required.');
+        return;
+      }
+
       await onSave({
         title: form.title.trim(),
+        slug,
         excerpt: form.excerpt.trim(),
         content: form.content.trim(),
         author: form.author.trim() || 'Ambassador Team',
         category,
+        tags: form.tags,
         status: form.status,
         publishedAt: form.publishedAt,
         coverImage: cover.url,
@@ -268,7 +289,7 @@ export default function AdminBlogModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4">
           <h2 className="text-lg font-bold text-gray-900">{title}</h2>
           <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Close">
@@ -359,6 +380,38 @@ export default function AdminBlogModal({
             />
           </div>
 
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-gray-700">Permalink</label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <span className="shrink-0 text-xs text-gray-500">
+                {BLOG_PATH}/
+              </span>
+              <input
+                disabled={readOnly}
+                value={form.slug}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, slug: normalizeBlogSlug(e.target.value) }))
+                }
+                placeholder="my-post-url"
+                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:bg-gray-50"
+              />
+              {!readOnly ? (
+                <button
+                  type="button"
+                  className="shrink-0 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                  onClick={() =>
+                    setForm((f) => ({ ...f, slug: slugFromBlogTitle(f.title) }))
+                  }
+                >
+                  From title
+                </button>
+              ) : null}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Public URL for this post. Lowercase letters, numbers, and hyphens only.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-semibold text-gray-700">Author</label>
@@ -421,6 +474,16 @@ export default function AdminBlogModal({
           </div>
 
           <div>
+            <label className="mb-1 block text-xs font-semibold text-gray-700">Tags</label>
+            <BlogTagsInput
+              tags={form.tags}
+              onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+              suggestions={tagSuggestions}
+              disabled={readOnly}
+            />
+          </div>
+
+          <div>
             <div className="mb-1 flex items-center justify-between gap-2">
               <label className="text-xs font-semibold text-gray-700">Excerpt</label>
               {!readOnly ? (
@@ -448,30 +511,14 @@ export default function AdminBlogModal({
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-gray-700">Content</label>
-            <div className="mb-2 rounded-lg border border-[#0F4C69]/15 bg-[#0F4C69]/5 px-3 py-2 text-xs leading-relaxed text-gray-600">
-              <p className="font-semibold text-[#0F4C69]">Article format (like long-form blog pages)</p>
-              <ul className="mt-1 list-inside list-disc space-y-0.5">
-                <li>Blank line between paragraphs</li>
-                <li>
-                  <code className="text-[11px]">## Section title</code> — main headings (table of contents)
-                </li>
-                <li>
-                  <code className="text-[11px]">### Subsection</code> — sub-headings
-                </li>
-                <li>
-                  <code className="text-[11px]">- Bullet item</code> — one item per line in a block
-                </li>
-                <li>
-                  <code className="text-[11px]">&gt; Tip or note</code> — highlighted callout box
-                </li>
-              </ul>
-            </div>
-            <textarea
-              disabled={readOnly}
-              rows={10}
+            <p className="mb-2 text-xs text-gray-500">
+              WordPress-style editor — use H1/H2/H3, lists, and Link for internal posts or external URLs.
+            </p>
+            <BlogRichTextEditor
               value={form.content}
-              onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm disabled:bg-gray-50"
+              onChange={(content) => setForm((f) => ({ ...f, content }))}
+              disabled={readOnly}
+              excludePostId={sourcePost?.id}
             />
           </div>
         </div>

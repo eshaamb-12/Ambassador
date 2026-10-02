@@ -12,11 +12,13 @@ import AdminBlogModal, {
 import { adminIconActionBtn, adminIconActionBtnDanger } from '@/admin/lib/adminTableActionStyles';
 import { formatBlogDate } from '@/lib/blogDisplay';
 import { useDashboardPermissions } from '@/hooks/useDashboardPermissions';
+import { canEditBlogPostFully } from '@/utils/dashboardRoles';
 import { blogDetailPath } from '@/lib/siteRoutes';
 import { BLOG_CATEGORIES, type BlogPost } from '@/lib/blog.types';
 
 const BlogsAdminPage = () => {
-  const { canDelete, canChangeStatus } = useDashboardPermissions();
+  const { canDelete, role } = useDashboardPermissions();
+  const canEditBlog = canEditBlogPostFully(role);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
@@ -58,10 +60,18 @@ const BlogsAdminPage = () => {
     );
   }, [posts]);
 
+  const tagSuggestions = useMemo(() => {
+    const fromPosts = posts.flatMap((p) => p.tags ?? []);
+    return [...new Set(fromPosts.map((t) => t.trim()).filter(Boolean))].sort((a, b) =>
+      a.localeCompare(b, 'en', { sensitivity: 'base' }),
+    );
+  }, [posts]);
+
   const filtered = posts.filter(
     (post) =>
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (post.category ?? '').toLowerCase().includes(searchTerm.toLowerCase()),
+      (post.category ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (post.tags ?? []).some((t) => t.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
   const openAdd = () => {
@@ -142,7 +152,7 @@ const BlogsAdminPage = () => {
   };
 
   const handleToggleStatus = async (post: BlogPost) => {
-    if (!canChangeStatus) return;
+    if (!canEditBlog) return;
     setTogglingId(post.id);
     try {
       const next = post.status === 'active' ? 'inactive' : 'active';
@@ -237,13 +247,13 @@ const BlogsAdminPage = () => {
                     <td className="px-4 py-3">
                       <button
                         type="button"
-                        disabled={!canChangeStatus || togglingId === post.id}
+                        disabled={!canEditBlog || togglingId === post.id}
                         onClick={() => handleToggleStatus(post)}
                         className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                           post.status === 'active'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-gray-200 text-gray-600'
-                        } ${canChangeStatus ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
+                        } ${canEditBlog ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
                       >
                         {post.status === 'active' ? 'Active' : 'Inactive'}
                       </button>
@@ -329,8 +339,9 @@ const BlogsAdminPage = () => {
         submitting={submitting}
         onClose={closeModal}
         onSave={handleSave}
-        canChangeStatus={canChangeStatus}
+        canChangeStatus={canEditBlog}
         categorySuggestions={categorySuggestions}
+        tagSuggestions={tagSuggestions}
       />
 
       {showDeleteModal && selectedPost ? (

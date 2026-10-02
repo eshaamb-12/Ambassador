@@ -1,4 +1,6 @@
-/** Structured blocks parsed from admin “content” text (see AdminBlogModal help). */
+/** Structured blocks parsed from admin “content” text (legacy markdown-style posts). */
+
+import { isBlogHtmlContent, stripHtmlForWordCount } from '@/lib/blogHtml';
 
 export type BlogHeading = {
   level: 2 | 3;
@@ -23,7 +25,8 @@ export function slugifyBlogHeading(text: string): string {
 }
 
 export function estimateReadMinutes(content: string): number {
-  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  const plain = isBlogHtmlContent(content) ? stripHtmlForWordCount(content) : content.trim();
+  const words = plain.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 }
 

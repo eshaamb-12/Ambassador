@@ -3,18 +3,9 @@ import mongoose from 'mongoose';
 import connectDB from '@/backend/config/db';
 import BlogPost from '@/backend/models/BlogPost.model';
 import { toBlogPost } from '@/backend/lib/blogPosts';
-import {
-  getAuthUser,
-  requireAdmin,
-  requireFullAdmin,
-  rejectManagerStatusChange,
-} from '@/backend/lib/adminAuth';
-import {
-  BLOG_CATEGORY_MAX,
-  BLOG_CONTENT_MAX,
-  BLOG_EXCERPT_MAX,
-  BLOG_TITLE_MAX,
-} from '@/lib/blog.types';
+import { requireAdmin, requireFullAdmin } from '@/backend/lib/adminAuth';
+import { ensureUniqueBlogSlug } from '@/backend/lib/blogSlugUnique';
+import { validateBlogWriteBody } from '@/lib/blogValidation';
 
 function mongooseValidationMessage(error: unknown): string | null {
   if (!error || typeof error !== 'object' || !('errors' in error)) return null;
@@ -70,77 +61,48 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const deactivateError = await rejectManagerStatusChange(req, body, {
-      currentStatus: doc.status,
-    });
-    if (deactivateError) return deactivateError;
 
-    if (body.title !== undefined) {
-      const title = String(body.title).trim();
-      if (!title) {
-        return NextResponse.json({ success: false, message: 'Title cannot be empty.' }, { status: 400 });
-      }
-      if (title.length > BLOG_TITLE_MAX) {
-        return NextResponse.json(
-          { success: false, message: `Title cannot exceed ${BLOG_TITLE_MAX} characters.` },
-          { status: 422 },
-        );
-      }
-      doc.title = title;
+    const merged: Record<string, unknown> = {
+      title: body.title ?? doc.title,
+      slug: body.slug ?? doc.slug,
+      excerpt: body.excerpt ?? doc.excerpt,
+      content: body.content ?? doc.content,
+      coverImage: body.coverImage ?? doc.coverImage,
+      coverImagePublicId: body.coverImagePublicId ?? doc.coverImagePublicId,
+      author: body.author ?? doc.author,
+      category: body.category ?? doc.category,
+      tags: body.tags ?? doc.tags,
+      status: body.status ?? doc.status,
+      publishedAt: body.publishedAt ?? doc.publishedAt,
+    };
+
+    const { data, errors } = validateBlogWriteBody(merged, false);
+    if (!data) {
+      const firstError = Object.values(errors)[0] ?? 'Please check the form.';
+      return NextResponse.json({ success: false, message: firstError, errors }, { status: 422 });
     }
-    if (body.excerpt !== undefined) {
-      const excerpt = String(body.excerpt).trim();
-      if (excerpt.length > BLOG_EXCERPT_MAX) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: `Excerpt cannot exceed ${BLOG_EXCERPT_MAX} characters (short summary for blog cards).`,
-          },
-          { status: 422 },
-        );
-      }
-      doc.excerpt = excerpt;
+
+    if (!data.title) {
+      return NextResponse.json({ success: false, message: 'Title cannot be empty.' }, { status: 400 });
     }
-    if (body.content !== undefined) {
-      const content = String(body.content).trim();
-      if (content.length > BLOG_CONTENT_MAX) {
-        return NextResponse.json(
-          { success: false, message: `Content is too long (max ${BLOG_CONTENT_MAX} characters).` },
-          { status: 422 },
-        );
-      }
-      doc.content = content;
+    if (!data.content) {
+      return NextResponse.json({ success: false, message: 'Content is required.' }, { status: 422 });
     }
-    if (body.coverImage !== undefined) doc.coverImage = String(body.coverImage).trim();
-    if (body.coverImagePublicId !== undefined) {
-      doc.coverImagePublicId = String(body.coverImagePublicId).trim();
-    }
-    if (body.author !== undefined) doc.author = String(body.author).trim() || 'Ambassador Team';
-    if (body.category !== undefined) {
-      const category = String(body.category).trim();
-      if (category.length > BLOG_CATEGORY_MAX) {
-        return NextResponse.json(
-          { success: false, message: `Category cannot exceed ${BLOG_CATEGORY_MAX} characters.` },
-          { status: 422 },
-        );
-      }
-      doc.category = category;
-    }
-    if (body.status !== undefined) {
-      const user = await getAuthUser(req);
-      const nextStatus = body.status === 'inactive' ? 'inactive' : 'active';
-      if (user?.role === 'manager' && nextStatus !== doc.status) {
-        return NextResponse.json(
-          { success: false, message: 'Managers cannot change publish status.' },
-          { status: 403 },
-        );
-      }
-      doc.status = nextStatus;
-    }
-    if (body.publishedAt !== undefined) {
-      const parsed = new Date(String(body.publishedAt));
-      if (!Number.isNaN(parsed.getTime())) doc.publishedAt = parsed;
-    }
+
+    const slug =
+      data.slug !== doc.slug ? await ensureUniqueBlogSlug(data.slug, doc._id) : doc.slug;
+
+    doc.title = data.title;
+    doc.slug = slug;
+    doc.excerpt = data.excerpt;
+    doc.content = data.content;
+    doc.coverImage = data.coverImage;
+    doc.coverImagePublicId = data.coverImagePublicId;
+    doc.author = data.author;
+    doc.category = data.category;
+    doc.tags = data.tags;
+    doc.status = data.status;
+    doc.publishedAt = data.publishedAt;
 
     await doc.save();
 

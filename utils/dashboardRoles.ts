@@ -23,6 +23,11 @@ export function canChangeStatusInDashboard(role?: string | null): boolean {
   return isFullAdmin(role);
 }
 
+/** Blog posts: managers may edit every field (including publish status). Delete stays admin-only. */
+export function canEditBlogPostFully(role?: string | null): boolean {
+  return isDashboardStaff(role);
+}
+
 /** @deprecated Use canChangeStatusInDashboard */
 export function canDeactivateInDashboard(role?: string | null): boolean {
   return canChangeStatusInDashboard(role);

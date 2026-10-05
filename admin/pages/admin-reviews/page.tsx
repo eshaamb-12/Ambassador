@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import AdminProductPicker from '@/admin/components/AdminProductPicker';
+import AdminCategoryPicker from '@/admin/components/AdminCategoryPicker';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { adminIconActionBtn, adminIconActionBtnDanger } from '@/admin/lib/adminTableActionStyles';
@@ -19,8 +21,6 @@ interface Review {
   status: 'approved' | 'pending' | 'rejected';
   createdAt: string;
 }
-
-interface Product { _id: string; name: string; images: string[]; }
 
 // ─── Star renderer ────────────────────────────────────────────────────────────
 
@@ -47,7 +47,6 @@ const statusCls: Record<string, string> = {
 const ReviewsPage = () => {
   const { canDelete } = useDashboardPermissions();
   const [reviews,  setReviews]  = useState<Review[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [successMsg, setSuccessMsg] = useState('');
   const [error,      setError]      = useState('');
@@ -55,7 +54,8 @@ const ReviewsPage = () => {
 
   // Filters
   const [search,     setSearch]     = useState('');
-  const [filterProd, setFilterProd] = useState('all');
+  const [filterProd, setFilterProd] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
   const [filterStar, setFilterStar] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -96,23 +96,26 @@ const ReviewsPage = () => {
     try {
       const params = new URLSearchParams();
       if (search       && search !== '')       params.set('search',    search);
-      if (filterProd   && filterProd !== 'all') params.set('productId', filterProd);
+      if (filterProd) params.set('productId', filterProd);
+      if (filterCategory) params.set('categoryId', filterCategory);
       if (filterStar   && filterStar !== 'all') params.set('rating',    filterStar);
       if (filterStatus && filterStatus !== 'all') params.set('status',  filterStatus);
 
-      const [rRes, pRes] = await Promise.all([
-        fetch(`/api/admin/reviews?${params}`, { credentials: 'include' }),
-        fetch('/api/admin/products',           { credentials: 'include' }),
-      ]);
-      const [rData, pData] = await Promise.all([rRes.json(), pRes.json()]);
+      const rRes = await fetch(`/api/admin/reviews?${params}`, { credentials: 'include' });
+      const rData = await rRes.json();
       if (rData.success) setReviews(rData.data);
-      if (pData.success) setProducts(pData.data);
     } catch {
       showError('Failed to load reviews.');
     } finally {
       setLoading(false);
     }
-  }, [search, filterProd, filterStar, filterStatus]);
+  }, [search, filterProd, filterCategory, filterStar, filterStatus]);
+
+  const filterProductName = useMemo(() => {
+    if (!filterProd) return '';
+    const hit = reviews.find((r) => r.productId?._id === filterProd);
+    return hit?.productId?.name ?? '';
+  }, [filterProd, reviews]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -329,11 +332,22 @@ const ReviewsPage = () => {
                 onChange={e => setSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:ring-2 focus:ring-[#0F4C69]/30 focus:border-[#0F4C69]" />
             </div>
-            <select value={filterProd} onChange={e => setFilterProd(e.target.value)}
-              className="w-full md:w-52 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:ring-2 focus:ring-[#0F4C69]/30">
-              <option value="all">All Products</option>
-              {products.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
-            </select>
+            <div className="w-full md:w-56">
+              <AdminProductPicker
+                value={filterProd}
+                selectedName={filterProductName}
+                onChange={setFilterProd}
+                allowEmpty
+                emptyLabel="All products"
+                placeholder="Filter by product or category…"
+              />
+            </div>
+            <AdminCategoryPicker
+              value={filterCategory}
+              onChange={setFilterCategory}
+              emptyLabel="All categories"
+              placeholder="Filter by category…"
+            />
             <select value={filterStar} onChange={e => setFilterStar(e.target.value)}
               className="w-full md:w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:ring-2 focus:ring-[#0F4C69]/30">
               <option value="all">All Ratings</option>
@@ -816,12 +830,12 @@ const ReviewsPage = () => {
                 {/* Product */}
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Product <span className="text-red-500">*</span></label>
-                  <select value={addForm.productId}
-                    onChange={e => setAddForm(f => ({ ...f, productId: e.target.value }))}
-                    className={inputCls(!!addErrors.productId)}>
-                    <option value="">— Select product —</option>
-                    {products.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
-                  </select>
+                  <AdminProductPicker
+                    value={addForm.productId}
+                    onChange={(productId) => setAddForm((f) => ({ ...f, productId }))}
+                    error={!!addErrors.productId}
+                    placeholder="Search product or category name…"
+                  />
                   {addErrors.productId && <p className="text-red-500 text-xs mt-1">{addErrors.productId}</p>}
                 </div>
 

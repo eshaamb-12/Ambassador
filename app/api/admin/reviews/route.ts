@@ -17,11 +17,20 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search    = searchParams.get('search')    ?? '';
     const productId = searchParams.get('productId') ?? '';
+    const categoryId = searchParams.get('categoryId') ?? '';
     const status    = searchParams.get('status')    ?? 'all';
     const rating    = searchParams.get('rating')    ?? 'all';
 
     const filter: Record<string, unknown> = {};
-    if (productId)       filter.productId = productId;
+    if (productId) filter.productId = productId;
+    if (categoryId) {
+      const ids = await Product.find({ categories: categoryId }).distinct('_id');
+      filter.productId = productId
+        ? ids.some((id) => String(id) === productId)
+          ? productId
+          : { $in: [] }
+        : { $in: ids };
+    }
     if (status !== 'all') filter.status   = status;
     if (rating !== 'all') filter.rating   = Number(rating);
     if (search) {

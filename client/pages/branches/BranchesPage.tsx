@@ -48,11 +48,11 @@ const BranchesPage = () => {
     {
       id: '1',
       name: 'Fazaia Showroom',
-      address: 'Ca 77, Fazaia Downtown, Lahore, Pakistan',
+      address: 'CA 77, Fazaia Downtown, Lahore, Pakistan',
       city: 'Lahore',
       state: 'Punjab',
       pincode: '54000',
-      phone: '03302003735',
+      phone: '03370127566',
       email: 'info@ambassador.pk',
       manager: 'Mr Syed Naeem-ul-Hassan',
       hours: 'Mon–Sat: 9:00 AM – 6:00 PM',

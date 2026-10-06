@@ -1,16 +1,25 @@
 'use client';
 
 import Image from 'next/image';
+import { DEFAULT_BLOG_PAGE_CONFIG } from '@/lib/blogPage.defaults';
+import type { BlogHeroContent } from '@/lib/blogPage.types';
 
 const BANNER_WIDTH = 2752;
 const BANNER_HEIGHT = 1536;
 
-const BlogHeroSection = () => {
+type BlogHeroSectionProps = {
+  content?: BlogHeroContent;
+};
+
+const BlogHeroSection = ({ content: contentProp }: BlogHeroSectionProps) => {
+  const content = contentProp ?? DEFAULT_BLOG_PAGE_CONFIG.hero;
+  const src = content.imageUrl?.trim() || DEFAULT_BLOG_PAGE_CONFIG.hero.imageUrl;
+
   return (
     <section className="w-full overflow-hidden bg-white">
       <Image
-        src="/Images/blog-image.png"
-        alt="Ambassador blog"
+        src={src}
+        alt={content.imageAlt || 'Ambassador blog'}
         width={BANNER_WIDTH}
         height={BANNER_HEIGHT}
         className="h-auto w-full"

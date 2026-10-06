@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { PRODUCTS_PATH } from '@/lib/siteRoutes';
+import GalleryHeroSection from '@/components/gallery/GalleryHeroSection';
 import SignupBanner from '@/components/common/signup-banner';
+import { PRODUCTS_PATH } from '@/lib/siteRoutes';
+import { DEFAULT_GALLERY_PAGE_CONFIG } from '@/lib/galleryPage.defaults';
+import type { GalleryPageConfig, GalleryReviewsIntroContent, GallerySectionId } from '@/lib/galleryPage.types';
 
 interface Review {
   id: string;
@@ -44,9 +47,17 @@ interface GalleryReviewCardProps {
   review: Review;
   embedUrl: string | null;
   directVideoUrl: string;
+  viewProductCta: string;
+  fullTestimonialLabel: string;
 }
 
-function GalleryReviewCard({ review, embedUrl, directVideoUrl }: GalleryReviewCardProps) {
+function GalleryReviewCard({
+  review,
+  embedUrl,
+  directVideoUrl,
+  viewProductCta,
+  fullTestimonialLabel,
+}: GalleryReviewCardProps) {
   const [revealed, setRevealed] = useState(false);
   const hasQuote = Boolean(review.review?.trim());
 
@@ -55,7 +66,6 @@ function GalleryReviewCard({ review, embedUrl, directVideoUrl }: GalleryReviewCa
       className="relative flex h-[450px] flex-col overflow-hidden rounded-xl bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
       onMouseLeave={() => setRevealed(false)}
     >
-      {/* Video/Image Section */}
       <div className={`relative shrink-0 bg-gray-100 h-[14.5rem] sm:h-[16rem] md:h-[17.5rem] ${revealed ? 'pointer-events-none' : ''}`}>
         {embedUrl ? (
           <iframe
@@ -100,7 +110,7 @@ function GalleryReviewCard({ review, embedUrl, directVideoUrl }: GalleryReviewCa
             href={PRODUCTS_PATH}
             className={`inline-flex items-center rounded-lg bg-orange-500 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600 ${revealed ? 'pointer-events-none opacity-50' : ''}`}
           >
-            View Product
+            {viewProductCta}
             <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -108,7 +118,6 @@ function GalleryReviewCard({ review, embedUrl, directVideoUrl }: GalleryReviewCa
         </div>
       </div>
 
-      {/* Sliding dark overlay — bottom → top */}
       <div
         className={`absolute inset-0 z-20 flex flex-col justify-center bg-black/70 px-6 py-8 backdrop-blur-[2px] transition-transform duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] motion-reduce:transition-none ${
           revealed && hasQuote ? 'translate-y-0' : 'translate-y-full'
@@ -122,7 +131,7 @@ function GalleryReviewCard({ review, embedUrl, directVideoUrl }: GalleryReviewCa
                 &ldquo;
               </span>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-orange-100/95">
-                Full testimonial
+                {fullTestimonialLabel}
               </p>
             </div>
             <p className="text-[15px] italic leading-relaxed tracking-wide text-white/95">{review.review}</p>
@@ -133,9 +142,20 @@ function GalleryReviewCard({ review, embedUrl, directVideoUrl }: GalleryReviewCa
   );
 }
 
-const GalleryPage = () => {
+function getYouTubeEmbedUrl(url: string) {
+  const videoId = url.includes('youtube.com/watch?v=')
+    ? url.split('v=')[1]?.split('&')[0]
+    : url.includes('youtu.be/')
+      ? url.split('youtu.be/')[1]?.split('?')[0]
+      : url.includes('youtube.com/shorts/')
+        ? url.split('/shorts/')[1]?.split('?')[0]
+        : null;
+
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+}
+
+function GalleryReviewsSection({ intro }: { intro: GalleryReviewsIntroContent }) {
   const [reviews, setReviews] = useState<Review[]>([]);
-  /** Requested page; clamped below so it stays in range when the list shrinks */
   const [pageRequest, setPageRequest] = useState(1);
   const reviewsPerPage = 6;
 
@@ -161,7 +181,6 @@ const GalleryPage = () => {
     };
   }, []);
 
-  // Pagination logic
   const totalPages = Math.max(1, Math.ceil(reviews.length / reviewsPerPage));
   const currentPage = Math.min(Math.max(1, pageRequest), totalPages);
   const indexOfLastReview = currentPage * reviewsPerPage;
@@ -173,146 +192,129 @@ const GalleryPage = () => {
     setPageRequest(next);
   };
 
-  const getYouTubeEmbedUrl = (url: string) => {
-    const videoId = url.includes('youtube.com/watch?v=')
-      ? url.split('v=')[1]?.split('&')[0]
-      : url.includes('youtu.be/')
-        ? url.split('youtu.be/')[1]?.split('?')[0]
-        : url.includes('youtube.com/shorts/')
-          ? url.split('/shorts/')[1]?.split('?')[0]
-          : null;
+  return (
+    <div className="container mx-auto px-4 py-16">
+      <div className="mb-12 text-center">
+        <h2 className="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">
+          {intro.titleBefore} <span className="text-orange-500">{intro.titleHighlight}</span>
+        </h2>
+        <p className="mx-auto max-w-3xl text-lg text-gray-600">{intro.description}</p>
+      </div>
 
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {currentReviews.map((review) => {
+          const url = review.videoUrl?.trim() ?? '';
+          const embedUrl = url ? getYouTubeEmbedUrl(url) : null;
+          const directVideoUrl =
+            embedUrl || !url ? '' : /^https?:\/\//i.test(url) && !isYoutubeVideoUrl(url) ? url : '';
+
+          return (
+            <GalleryReviewCard
+              key={review.id}
+              review={review}
+              embedUrl={embedUrl}
+              directVideoUrl={directVideoUrl}
+              viewProductCta={intro.viewProductCta}
+              fullTestimonialLabel={intro.fullTestimonialLabel}
+            />
+          );
+        })}
+      </div>
+
+      <div className="mt-12 flex justify-center">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1 || reviews.length === 0}
+            className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+              currentPage === 1 || reviews.length === 0
+                ? 'cursor-not-allowed bg-gray-100 text-gray-400'
+                : 'border border-gray-300 bg-white text-gray-700 hover:border-orange-300 hover:bg-orange-50'
+            }`}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+            <button
+              key={pageNumber}
+              onClick={() => paginate(pageNumber)}
+              className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+                currentPage === pageNumber
+                  ? 'bg-orange-500 text-white'
+                  : 'border border-gray-300 bg-white text-gray-700 hover:border-orange-300 hover:bg-orange-50'
+              }`}
+            >
+              {pageNumber}
+            </button>
+          ))}
+
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages || reviews.length === 0}
+            className={`rounded-lg px-4 py-2 font-medium transition-colors ${
+              currentPage === totalPages || reviews.length === 0
+                ? 'cursor-not-allowed bg-gray-100 text-gray-400'
+                : 'border border-gray-300 bg-white text-gray-700 hover:border-orange-300 hover:bg-orange-50'
+            }`}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-6 text-center">
+        <p className="text-gray-600">
+          Showing {reviews.length === 0 ? 0 : indexOfFirstReview + 1} to{' '}
+          {reviews.length === 0 ? 0 : Math.min(indexOfLastReview, reviews.length)} of {reviews.length} reviews
+        </p>
+      </div>
+    </div>
+  );
+}
+
+type GalleryPageProps = {
+  config?: GalleryPageConfig;
+};
+
+const GalleryPage = ({ config: configProp }: GalleryPageProps) => {
+  const config = configProp ?? DEFAULT_GALLERY_PAGE_CONFIG;
+
+  const renderSection = (id: GallerySectionId) => {
+    switch (id) {
+      case 'hero':
+        return <GalleryHeroSection content={config.hero} />;
+      case 'reviews':
+        return <GalleryReviewsSection intro={config.reviews} />;
+      case 'signup':
+        return <SignupBanner content={config.signup} />;
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <style jsx global>{`
         :root {
-          --color-gray-dark: #565D63;
-          --color-orange: #E36630;
-          --color-blue: #0F4C69;
-          --color-gray-medium: #4B4B4B;
+          --color-gray-dark: #565d63;
+          --color-orange: #e36630;
+          --color-blue: #0f4c69;
+          --color-gray-medium: #4b4b4b;
           --color-black: #000000;
-          --color-white: #FFFFFF;
+          --color-white: #ffffff;
         }
       `}</style>
 
-      {/* Hero Section */}
-      <div className="relative bg-gray-900 text-white py-16 h-96 md:h-[600px]">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <img
-            src="/Images/Chef-Reviews-Banner.png"
-            alt="Gallery & Reviews Background"
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = `https://via.placeholder.com/1920x400/E36630/ffffff?text=Gallery+Reviews`;
-            }}
-          />
-          <div className="absolute "></div>
-        </div>
-        <div className="relative z-10 h-full flex items-center justify-center text-white">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">
-              Gallery & Reviews
-            </h1>
-            <p className="text-xl md:text-2xl text-orange-100 drop-shadow-lg">
-              See what top chefs, YouTubers, and celebrities say about Ambassador Commercial Kitchen Equipment
-            </p>
-          </div>
-        </div>
-      </div>
-
-
-
-
-
-      {/* Reviews Grid */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Customer <span className="text-orange-500">Reviews</span>
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Hear directly from culinary professionals who trust Ambassador Commercial Kitchen Equipment for their businesses
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {currentReviews.map(review => {
-            const url = review.videoUrl?.trim() ?? '';
-            const embedUrl = getYouTubeEmbedUrl(url);
-            const directVideoUrl =
-              embedUrl || !url ? '' : /^https?:\/\//i.test(url) && !isYoutubeVideoUrl(url) ? url : '';
-
-            return (
-              <GalleryReviewCard
-                key={review.id}
-                review={review}
-                embedUrl={embedUrl}
-                directVideoUrl={directVideoUrl}
-              />
-            );
-          })}
-        </div>
-
-        {/* Pagination */}
-        <div className="mt-12 flex justify-center">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => paginate(currentPage - 1)}
-              disabled={currentPage === 1 || reviews.length === 0}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === 1 || reviews.length === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-orange-50 hover:border-orange-300'
-                }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNumber => (
-              <button
-                key={pageNumber}
-                onClick={() => paginate(pageNumber)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === pageNumber
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-orange-50 hover:border-orange-300'
-                  }`}
-              >
-                {pageNumber}
-              </button>
-            ))}
-
-            <button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === totalPages || reviews.length === 0}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === totalPages || reviews.length === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-orange-50 hover:border-orange-300'
-                }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Page Info */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Showing{' '}
-            {reviews.length === 0 ? 0 : indexOfFirstReview + 1} to{' '}
-            {reviews.length === 0 ? 0 : Math.min(indexOfLastReview, reviews.length)} of {reviews.length} reviews
-          </p>
-        </div>
-      </div>
-
-      {/* Signup Banner */}
-      <SignupBanner />
+      {config.sections
+        .filter((s) => s.enabled)
+        .map((section) => (
+          <div key={section.id}>{renderSection(section.id)}</div>
+        ))}
     </div>
   );
 };

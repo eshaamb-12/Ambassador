@@ -1,8 +1,18 @@
 import Link from 'next/link';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import AboutPageEditor from '@/admin/pages/pages-management/AboutPageEditor';
+import BlogPageEditor from '@/admin/pages/pages-management/BlogPageEditor';
+import BranchesPageEditor from '@/admin/pages/pages-management/BranchesPageEditor';
+import GalleryPageEditor from '@/admin/pages/pages-management/GalleryPageEditor';
 import HomePageEditor from '@/admin/pages/pages-management/HomePageEditor';
-import { getAboutPageConfig, getHomePageConfig, isManagedPageSlug } from '@/backend/lib/loadSitePage';
+import {
+  getAboutPageConfig,
+  getBlogPageConfig,
+  getBranchesPageConfig,
+  getGalleryPageConfig,
+  getHomePageConfig,
+  isManagedPageSlug,
+} from '@/backend/lib/loadSitePage';
 import { MANAGED_PAGES } from '@/lib/sitePages.types';
 
 export default async function PageEditorAppRoute({
@@ -35,6 +45,9 @@ export default async function PageEditorAppRoute({
         </div>
         {slug === 'home' ? <HomePageEditor initialConfig={await getHomePageConfig()} /> : null}
         {slug === 'about' ? <AboutPageEditor initialConfig={await getAboutPageConfig()} /> : null}
+        {slug === 'blog' ? <BlogPageEditor initialConfig={await getBlogPageConfig()} /> : null}
+        {slug === 'gallery' ? <GalleryPageEditor initialConfig={await getGalleryPageConfig()} /> : null}
+        {slug === 'branches' ? <BranchesPageEditor initialConfig={await getBranchesPageConfig()} /> : null}
       </div>
     </DashboardLayout>
   );

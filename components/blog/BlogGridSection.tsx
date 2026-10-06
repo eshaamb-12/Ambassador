@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { BlogPost } from '@/lib/blog.types';
 import { BLOG_PAGE_SIZE } from '@/lib/blog.types';
 import BlogCard from '@/components/blog/BlogCard';
+import { DEFAULT_BLOG_PAGE_CONFIG } from '@/lib/blogPage.defaults';
+import type { BlogListingContent } from '@/lib/blogPage.types';
 
 function blogPaginationPages(currentPage: number, totalPages: number): (number | '…')[] {
   if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -17,7 +19,12 @@ function blogPaginationPages(currentPage: number, totalPages: number): (number |
   return pages;
 }
 
-const BlogGridSection = () => {
+type BlogGridSectionProps = {
+  content?: BlogListingContent;
+};
+
+const BlogGridSection = ({ content: contentProp }: BlogGridSectionProps) => {
+  const content = contentProp ?? DEFAULT_BLOG_PAGE_CONFIG.listing;
   const gridRef = useRef<HTMLDivElement>(null);
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -101,25 +108,23 @@ const BlogGridSection = () => {
     <section ref={gridRef} className="scroll-mt-28 bg-[#FAFAFA] py-12 md:py-16">
       <div className="container mx-auto px-4">
         <div className="mx-auto mb-10 max-w-3xl text-center">
-          <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">Latest Articles</h2>
-          <p className="mt-3 text-sm leading-relaxed text-gray-600 md:text-base">
-            Browse guides and updates from our commercial kitchen equipment specialists.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">{content.title}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-gray-600 md:text-base">{content.description}</p>
         </div>
 
         <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:flex-row md:items-end md:p-5">
           <div className="flex-1">
-            <label className="mb-1.5 block text-xs font-semibold text-gray-700">Search</label>
+            <label className="mb-1.5 block text-xs font-semibold text-gray-700">{content.searchLabel}</label>
             <input
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by title or topic…"
+              placeholder={content.searchPlaceholder}
               className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:border-[#0F4C69] focus:outline-none focus:ring-2 focus:ring-[#0F4C69]/20"
             />
           </div>
           <div className="w-full md:w-56">
-            <label className="mb-1.5 block text-xs font-semibold text-gray-700">Category</label>
+            <label className="mb-1.5 block text-xs font-semibold text-gray-700">{content.categoryLabel}</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -155,12 +160,10 @@ const BlogGridSection = () => {
         ) : posts.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-16 text-center">
             <p className="text-lg font-semibold text-gray-800">
-              {hasActiveFilters ? 'No matching articles' : 'No articles yet'}
+              {hasActiveFilters ? content.emptyFilteredTitle : content.emptyDefaultTitle}
             </p>
             <p className="mt-2 text-sm text-gray-500">
-              {hasActiveFilters
-                ? 'Try a different search or category.'
-                : 'Check back soon for new posts from the Ambassador team.'}
+              {hasActiveFilters ? content.emptyFilteredDescription : content.emptyDefaultDescription}
             </p>
           </div>
         ) : (

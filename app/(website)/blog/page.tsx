@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import BlogsPage from '@/client/pages/blog/BlogsPage';
+import { getBlogPageConfig } from '@/backend/lib/loadSitePage';
 import { canonicalMetadata } from '@/lib/siteUrl';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Blog | Ambassador Commercial Kitchen Equipment',
@@ -9,6 +12,7 @@ export const metadata: Metadata = {
   ...canonicalMetadata('/blog'),
 };
 
-export default function Blog() {
-  return <BlogsPage />;
+export default async function Blog() {
+  const config = await getBlogPageConfig();
+  return <BlogsPage config={config} />;
 }

@@ -3,25 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { submitContactForm } from '@/utils/contact.api';
-
-interface Branch {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  phone: string;
-  email: string;
-  manager: string;
-  hours: string;
-  services: string[];
-  image: string;
-  coordinates: { lat: number; lng: number };
-}
+import { DEFAULT_BRANCHES_PAGE_CONFIG } from '@/lib/branchesPage.defaults';
+import type { BranchesBookVisitContent, ShowroomBranch } from '@/lib/branchesPage.types';
 
 interface BookVisitSectionProps {
-  branches: Branch[];
+  branches: ShowroomBranch[];
+  content?: BranchesBookVisitContent;
 }
 
 const inputClass =
@@ -39,9 +26,16 @@ const TIME_SLOTS = [
   { value: '17:00-18:00', label: '5:00 PM – 6:00 PM' },
 ];
 
+const BENEFIT_ICONS = [
+  'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+  'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+  'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+];
+
 const EMPTY_FORM = { name: '', email: '', phone: '', branchId: '', date: '', timeSlot: '' };
 
-const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
+const BookVisitSection = ({ branches, content: contentProp }: BookVisitSectionProps) => {
+  const content = contentProp ?? DEFAULT_BRANCHES_PAGE_CONFIG.bookVisit;
   const [form, setForm] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
@@ -86,61 +80,48 @@ const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
   };
 
   return (
-    <section className="py-12 md:py-20 bg-[#FAFAFA] border-t border-gray-200">
+    <section className="border-t border-gray-200 bg-[#FAFAFA] py-12 md:py-20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#0F4C69] uppercase tracking-widest mb-4">
-            <span className="w-8 h-px bg-[#0F4C69]" />
-            Visit Us
-            <span className="w-8 h-px bg-[#0F4C69]" />
+        <div className="mb-12 text-center">
+          <span className="mb-4 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-[#0F4C69]">
+            <span className="h-px w-8 bg-[#0F4C69]" />
+            {content.eyebrow}
+            <span className="h-px w-8 bg-[#0F4C69]" />
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-            Book a <span className="text-[#E36630]">Showroom Visit</span>
+          <h2 className="mb-4 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+            {content.titleBefore} <span className="text-[#E36630]">{content.titleHighlight}</span>
           </h2>
-          <p className="text-gray-500 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-            See our commercial kitchen equipment in person. Schedule a tour at your nearest branch.
-          </p>
+          <p className="mx-auto max-w-2xl text-base leading-relaxed text-gray-500 md:text-lg">{content.description}</p>
         </div>
 
-        <div className="max-w-5xl mx-auto rounded-2xl border border-gray-100 bg-white shadow-[0_8px_40px_rgba(0,0,0,0.08)] overflow-hidden">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_8px_40px_rgba(0,0,0,0.08)]">
           <div className="grid grid-cols-1 lg:grid-cols-2">
-            <div className="bg-[#0F4C69] p-8 md:p-10 text-white">
-              <h3 className="text-xl font-bold mb-6">Why visit in person?</h3>
+            <div className="bg-[#0F4C69] p-8 text-white md:p-10">
+              <h3 className="mb-6 text-xl font-bold">{content.sidebarTitle}</h3>
               <ul className="space-y-6">
-                {[
-                  {
-                    title: 'Live Product Demos',
-                    desc: 'See cooking ranges, fryers, refrigeration and more operating before you buy.',
-                    icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-                  },
-                  {
-                    title: 'Expert Consultation',
-                    desc: 'Our specialists help you choose equipment for your kitchen layout and menu.',
-                    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
-                  },
-                  {
-                    title: 'Flexible Scheduling',
-                    desc: 'Pick your branch, date, and time slot — we confirm within 24 hours.',
-                    icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-                  },
-                ].map((item) => (
+                {content.benefits.map((item, index) => (
                   <li key={item.title} className="flex gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 border border-white/20">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10">
                       <svg className="h-5 w-5 text-[#E36630]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={item.icon} />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.8}
+                          d={BENEFIT_ICONS[index] ?? BENEFIT_ICONS[0]}
+                        />
                       </svg>
                     </div>
                     <div>
                       <p className="font-semibold text-white">{item.title}</p>
-                      <p className="text-sm text-white/60 mt-0.5 leading-relaxed">{item.desc}</p>
+                      <p className="mt-0.5 text-sm leading-relaxed text-white/60">{item.description}</p>
                     </div>
                   </li>
                 ))}
               </ul>
               <p className="mt-8 text-sm text-white/50">
-                Prefer to call?{' '}
-                <a href="tel:+923314937412" className="text-[#E36630] font-medium hover:underline">
-                  0333-1166925
+                {content.preferCallText}{' '}
+                <a href={content.preferCallPhoneHref} className="font-medium text-[#E36630] hover:underline">
+                  {content.preferCallPhoneDisplay}
                 </a>
               </p>
             </div>
@@ -158,7 +139,7 @@ const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="visit-name" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label htmlFor="visit-name" className="mb-1.5 block text-sm font-medium text-gray-700">
                     Full Name
                   </label>
                   <input
@@ -172,9 +153,9 @@ const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="visit-email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label htmlFor="visit-email" className="mb-1.5 block text-sm font-medium text-gray-700">
                       Email
                     </label>
                     <input
@@ -188,7 +169,7 @@ const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="visit-phone" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label htmlFor="visit-phone" className="mb-1.5 block text-sm font-medium text-gray-700">
                       Phone
                     </label>
                     <input
@@ -204,7 +185,7 @@ const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
                 </div>
 
                 <div>
-                  <label htmlFor="visit-branch" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label htmlFor="visit-branch" className="mb-1.5 block text-sm font-medium text-gray-700">
                     Select Branch
                   </label>
                   <select
@@ -223,9 +204,9 @@ const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="visit-date" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label htmlFor="visit-date" className="mb-1.5 block text-sm font-medium text-gray-700">
                       Preferred Date
                     </label>
                     <input
@@ -239,7 +220,7 @@ const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="visit-time" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    <label htmlFor="visit-time" className="mb-1.5 block text-sm font-medium text-gray-700">
                       Preferred Time Slot
                     </label>
                     <select
@@ -258,21 +239,21 @@ const BookVisitSection = ({ branches }: BookVisitSectionProps) => {
                     </select>
                   </div>
                 </div>
-                <p className="text-xs text-gray-400 -mt-2">Showroom hours: Mon–Sat, 9:00 AM – 6:00 PM</p>
+                <p className="-mt-2 text-xs text-gray-400">{content.hoursNote}</p>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-xl bg-[#E36630] py-3.5 px-6 font-semibold text-white shadow-lg shadow-[#E36630]/25 hover:bg-[#cc5a2a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-xl bg-[#E36630] px-6 py-3.5 font-semibold text-white shadow-lg shadow-[#E36630]/25 transition-all hover:bg-[#cc5a2a] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Sending Request...' : 'Book Appointment'}
+                  {isSubmitting ? content.submitCtaLoading : content.submitCta}
                 </button>
               </form>
 
               <p className="mt-4 text-center text-xs text-gray-400">
-                Or{' '}
-                <Link href="/contact-us" className="text-[#E36630] font-medium hover:underline">
-                  send us a message
+                {content.footerLinkText}{' '}
+                <Link href={content.footerLinkHref} className="font-medium text-[#E36630] hover:underline">
+                  {content.footerLinkLabel}
                 </Link>
               </p>
             </div>

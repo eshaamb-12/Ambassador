@@ -147,7 +147,7 @@ export interface HomePageConfig {
   cta: HomeCtaContent;
 }
 
-export type ManagedPageSlug = 'home' | 'about';
+export type ManagedPageSlug = 'home' | 'about' | 'blog' | 'gallery' | 'branches';
 
 export interface ManagedPageMeta {
   slug: ManagedPageSlug;
@@ -168,6 +168,24 @@ export const MANAGED_PAGES: ManagedPageMeta[] = [
     title: 'About',
     path: '/about',
     description: 'Company story, CEO message, certificates, testimonials, and FAQ.',
+  },
+  {
+    slug: 'blog',
+    title: 'Blog',
+    path: '/blog',
+    description: 'Blog landing page — banner, articles intro, filters labels, and sign-up banner.',
+  },
+  {
+    slug: 'gallery',
+    title: 'Gallery',
+    path: '/gallery',
+    description: 'Gallery landing page — hero banner, reviews intro copy, and sign-up banner.',
+  },
+  {
+    slug: 'branches',
+    title: 'Showrooms',
+    path: '/branches',
+    description: 'Showrooms page — hero, branch cards, stats, book-a-visit copy, and sign-up banner.',
   },
 ];
 

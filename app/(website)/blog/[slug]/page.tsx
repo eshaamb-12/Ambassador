@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const post = toBlogPost(doc as never);
   const path = `/blog/${post.slug}`;
   return {
-    title: `${post.title} | Blog | Ambassador`,
+    title: post.title,
     description: post.excerpt,
     ...canonicalMetadata(path),
     openGraph: {

@@ -64,7 +64,7 @@ function isYoutubeVideoUrl(url: string): boolean {
 function videoPreviewKind(url: string | undefined): 'youtube' | 'direct' | 'none' {
   if (!url?.trim()) return 'none';
   if (isYoutubeVideoUrl(url)) return 'youtube';
-  return 'direct';
+  return 'direct'; 
 }
 
 const AdminGalleryPage = () => {

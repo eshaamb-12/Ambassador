@@ -217,7 +217,6 @@ const OrderSummary = ({
           <div className="ml-3">
             <p className="text-sm font-medium text-blue-800">Delivery Information</p>
             <p className="mt-1 text-xs text-blue-700">Estimated delivery: 3-5 business days</p>
-            <p className="mt-1 text-xs text-blue-700">Available in major cities only</p>
           </div>
         </div>
       </div>

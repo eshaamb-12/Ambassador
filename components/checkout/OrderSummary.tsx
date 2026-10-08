@@ -98,9 +98,6 @@ const OrderSummary = ({
               <h4 className="line-clamp-2 pr-1 text-sm font-medium text-gray-900">
                 {item.title}
               </h4>
-              <p className="mt-1 text-xs text-gray-600">
-                Product Code: {item.productCode}
-              </p>
               <div className="mt-2 flex items-center justify-between">
                 <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
                 <span className="text-sm font-medium text-gray-900">

@@ -489,12 +489,7 @@ const CheckoutForm = () => {
             </div>
           )}
 
-          <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
-            <p className="text-sm text-yellow-800">
-              <strong>Note:</strong> Delivery is PKR {SHIPPING_RATE_PKR_PER_KG.toLocaleString()} per kg
-              (rounded up). Shipping is calculated after you enter your city and address.
-            </p>
-          </div>
+          
         </div>
 
         {/* Payment — online only */}

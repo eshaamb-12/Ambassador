@@ -5,6 +5,7 @@ import ProductMediaImage from '@/components/products/ProductMediaImage';
 import {
   buildProductMediaItems,
   cloudinaryVideoThumbnail,
+  PRODUCT_PLACEHOLDER,
   type ProductMediaItem,
 } from '@/utils/productMedia.util';
 
@@ -256,7 +257,10 @@ function ThumbButton({
             alt={`${productName} video`}
             className="h-full w-full object-cover"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = 'none';
+              const el = e.currentTarget;
+              if (!el.src.includes(PRODUCT_PLACEHOLDER)) {
+                el.src = PRODUCT_PLACEHOLDER;
+              }
             }}
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">

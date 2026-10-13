@@ -156,12 +156,53 @@ export function isNextImageSupportedUrl(src: string): boolean {
   }
 }
 
+function youtubeVideoId(url: string): string | null {
+  const u = url.trim();
+  const watch = u.match(/[?&]v=([^&]+)/);
+  if (watch?.[1]) return watch[1];
+  const short = u.match(/youtu\.be\/([^?&]+)/);
+  if (short?.[1]) return short[1];
+  const embed = u.match(/youtube\.com\/embed\/([^?&]+)/);
+  if (embed?.[1]) return embed[1];
+  const shorts = u.match(/youtube\.com\/shorts\/([^?&]+)/);
+  if (shorts?.[1]) return shorts[1];
+  return null;
+}
+
+function isCloudinaryTransformSegment(segment: string): boolean {
+  if (!segment || segment.includes('.')) return false;
+  if (/^v\d+$/.test(segment)) return true;
+  if (segment.includes(',')) return true;
+  return /^(f_|q_|c_|g_|h_|w_|so_|e_|fl_|dpr_|ar_)/i.test(segment);
+}
+
 /** Cloudinary video thumbnail (first frame) for thumb strip. */
 export function cloudinaryVideoThumbnail(videoUrl: string): string {
-  if (!videoUrl.includes('res.cloudinary.com') || !videoUrl.includes('/upload/')) {
-    return videoUrl;
+  const url = normalizeMediaUrl(videoUrl);
+  if (!url) return PRODUCT_PLACEHOLDER;
+
+  const ytId = youtubeVideoId(url);
+  if (ytId) return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+
+  if (!url.includes('res.cloudinary.com') || !url.includes('/video/upload/')) {
+    return PRODUCT_PLACEHOLDER;
   }
-  return videoUrl
-    .replace('/upload/', '/upload/so_0,w_320,h_320,c_fill,f_jpg/')
-    .replace(/\.[^.]+$/, '.jpg');
+
+  const match = url.match(/^https:\/\/res\.cloudinary\.com\/([^/]+)\/video\/upload\/(.+)$/i);
+  if (!match) return PRODUCT_PLACEHOLDER;
+
+  const [, cloud, tail] = match;
+  const segments = tail.split('/').filter(Boolean);
+  const publicIdParts: string[] = [];
+
+  for (const segment of segments) {
+    if (isCloudinaryTransformSegment(segment)) continue;
+    publicIdParts.push(segment);
+  }
+
+  let publicId = publicIdParts.join('/');
+  if (!publicId) return PRODUCT_PLACEHOLDER;
+  publicId = publicId.replace(/\.[a-z0-9]+$/i, '');
+
+  return `https://res.cloudinary.com/${cloud}/video/upload/so_0,w_320,h_320,c_fill,f_jpg,q_auto/${publicId}.jpg`;
 }

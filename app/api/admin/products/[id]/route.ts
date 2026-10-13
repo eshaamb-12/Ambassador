@@ -15,6 +15,7 @@ import {
   sanitizeProductFeatures,
   sanitizeProductBrands,
 } from '@/backend/lib/productMarketingFields';
+import { productPricingFromBody } from '@/backend/lib/productPriceRules';
 import { requireAdmin, requireFullAdmin, rejectManagerStatusChange } from '@/backend/lib/adminAuth';
 import { parseWeightKg } from '@/lib/shippingQuote';
 
@@ -110,8 +111,18 @@ export async function PATCH(
     }
     product.categories = toObjectIdArray(nextCategoryIds);
 
-    if (price !== undefined) product.price = price === '' || price === null ? undefined : Number(price);
-    if (originalPrice !== undefined) product.originalPrice = Number(originalPrice);
+    if (price !== undefined || originalPrice !== undefined || features !== undefined) {
+      const pricing = productPricingFromBody({
+        features: features !== undefined ? features : product.features,
+        originalPrice: originalPrice !== undefined ? originalPrice : product.originalPrice,
+        price: price !== undefined ? price : product.price,
+      });
+      if (!pricing.ok) {
+        return NextResponse.json({ success: false, message: pricing.message }, { status: 400 });
+      }
+      product.originalPrice = pricing.originalPrice;
+      product.price = pricing.price;
+    }
     if (stock !== undefined) product.stock = Number(stock);
     if (weightKg !== undefined) {
       const parsedWeight = parseWeightKg(weightKg);

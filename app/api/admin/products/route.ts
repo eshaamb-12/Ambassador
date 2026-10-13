@@ -11,6 +11,7 @@ import {
   sanitizeProductFeatures,
   sanitizeProductBrands,
 } from '@/backend/lib/productMarketingFields';
+import { productPricingFromBody } from '@/backend/lib/productPriceRules';
 import { requireAdmin, requireFullAdmin, rejectManagerStatusChange } from '@/backend/lib/adminAuth';
 import {
   buildAdminProductListFilter,
@@ -197,14 +198,9 @@ export async function POST(req: NextRequest) {
     if (!tax.ok) {
       return NextResponse.json({ success: false, message: tax.message }, { status: tax.status });
     }
-    if (!originalPrice || Number(originalPrice) <= 0) {
-      return NextResponse.json({ success: false, message: 'A valid original price is required.' }, { status: 400 });
-    }
-    if (price && Number(price) > Number(originalPrice)) {
-      return NextResponse.json(
-        { success: false, message: 'Discounted price cannot exceed original price.' },
-        { status: 400 }
-      );
+    const pricing = productPricingFromBody({ features, originalPrice, price });
+    if (!pricing.ok) {
+      return NextResponse.json({ success: false, message: pricing.message }, { status: 400 });
     }
 
     const parsedWeight = parseWeightKg(weightKg);
@@ -218,8 +214,8 @@ export async function POST(req: NextRequest) {
     const product = await Product.create({
       name: name.trim(),
       categories: toObjectIdArray(categoryIds),
-      ...(price ? { price: Number(price) } : {}),
-      originalPrice: Number(originalPrice),
+      ...(pricing.price != null ? { price: pricing.price } : {}),
+      originalPrice: pricing.originalPrice,
       stock: Number(stock ?? 0),
       weightKg: parsedWeight,
       status: status ?? 'active',

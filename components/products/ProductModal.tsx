@@ -52,6 +52,7 @@ export const PRODUCT_FEATURE_OPTIONS = [
   { id: 'on_sale', label: 'On Sale' },
   { id: 'new_arrival', label: 'New Arrival' },
   { id: 'best_seller', label: 'Best Seller' },
+  { id: 'customization', label: 'Customization' },
 ] as const;
 
 export const PRODUCT_BRAND_OPTIONS = [
@@ -797,11 +798,14 @@ const ProductModal: React.FC<ProductModalProps> = ({
   };
 
   // ── Validate ──
+  const isCustomization = form.features.includes('customization');
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.name.trim())                                      e.name             = 'Product name is required';
     if (!form.categoryIds.length)                               e.categoryIds    = 'Select at least one category';
-    if (!form.originalPrice || Number(form.originalPrice) <= 0) e.originalPrice = 'Original price is required';
+    const orig = form.originalPrice === '' ? 0 : Number(form.originalPrice);
+    if (!isCustomization && orig <= 0) e.originalPrice = 'Original price is required';
     if (form.price !== '' && Number(form.price) < 0)            e.price         = 'Discounted price cannot be negative';
     if (form.price !== '' && Number(form.originalPrice) > 0 && Number(form.price) > Number(form.originalPrice))
                                                                 e.price         = 'Discounted price cannot exceed original price';
@@ -1159,11 +1163,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
                           onChange={() => toggleFormFeature(opt.id)}
                           className="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-[#0F4C69] focus:ring-[#0F4C69]/30"
                         />
-                        <span className="text-gray-400">{opt.label}</span>
+                        <span className="text-gray-700">{opt.label}</span>
                       </label>
                     </li>
                   ))}
                 </ul>
+                {isCustomization && (
+                  <p className="mt-2 text-[11px] text-[#0F4C69]">
+                    Shows a <strong>Request customization</strong> button on the product page (links to contact
+                    form). Pricing fields below become optional.
+                  </p>
+                )}
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-600">
@@ -1216,7 +1226,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Original Price (PKR) <span className="text-red-500">*</span>
+                  Original Price (PKR){' '}
+                  {isCustomization ? (
+                    <span className="font-normal text-gray-400">(optional)</span>
+                  ) : (
+                    <span className="text-red-500">*</span>
+                  )}
                 </label>
                 <input type="number" min={0} value={form.originalPrice}
                   onChange={e => setForm(f => ({ ...f, originalPrice: e.target.value }))}

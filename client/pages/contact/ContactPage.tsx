@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import InputField from '@/components/common/InputField';
@@ -50,6 +50,25 @@ const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
   const [submitIsError, setSubmitIsError] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const customizationProduct = params.get('customization')?.trim();
+    if (customizationProduct) {
+      setFormData((prev) => ({
+        ...prev,
+        subject: prev.subject || 'sales',
+        message:
+          prev.message.trim() ||
+          `I am interested in customization for: ${customizationProduct}\n\nPlease share options and pricing.`,
+      }));
+    }
+    if (window.location.hash === '#contact-form') {
+      requestAnimationFrame(() => {
+        document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -177,7 +196,7 @@ const ContactPage = () => {
       </section>
 
       {/* Form + contact info */}
-      <section className="py-12 md:py-20 bg-[#FAFAFA]">
+      <section id="contact-form" className="scroll-mt-24 bg-[#FAFAFA] py-12 md:py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 md:mb-16">
             <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#0F4C69] uppercase tracking-widest mb-4">

@@ -20,7 +20,7 @@ export interface IProduct extends Document {
   specificationOrder?: string[];
   metaTitle?: string;
   metaDescription?: string;
-  /** Marketing flags — subset of free_shipping | on_sale | new_arrival | best_seller */
+  /** Marketing flags — free_shipping | on_sale | new_arrival | best_seller | customization */
   features: string[];
   /** Brand tags — subset of ambassador | imported */
   brands: string[];
@@ -61,7 +61,7 @@ const productSchema = new Schema<IProduct>(
     },
     originalPrice: {
       type: Number,
-      required: [true, 'Original price is required'],
+      default: 0,
       min: [0, 'Original price cannot be negative'],
     },
     stock: {

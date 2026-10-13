@@ -5,6 +5,7 @@ export const PRODUCT_FEATURE_KEYS = [
   'on_sale',
   'new_arrival',
   'best_seller',
+  'customization',
 ] as const;
 export type ProductFeatureKey = (typeof PRODUCT_FEATURE_KEYS)[number];
 

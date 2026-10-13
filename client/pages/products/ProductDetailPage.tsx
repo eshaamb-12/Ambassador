@@ -26,6 +26,7 @@ import {
   productUrlSegment,
 } from '@/lib/siteRoutes';
 import { orderedSpecificationEntries } from '@/lib/productSpecifications';
+import { productHasCustomization, productHasListedPrice } from '@/lib/productFeatures';
 interface CategoryRef {
   title?: string;
   slug?: string;
@@ -47,6 +48,7 @@ interface ProductDetail {
   specifications: Record<string, string>;
   specificationOrder?: string[];
   categories: CategoryRef[];
+  features?: string[];
   avgRating: number;
   reviewCount: number;
 }
@@ -344,15 +346,21 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
     return [visibleSpecs.slice(0, mid), visibleSpecs.slice(mid)];
   }, [visibleSpecs]);
 
+  const isCustomization = product ? productHasCustomization(product.features) : false;
+  const showListedPrice = product ? productHasListedPrice(product) : false;
   const displayPrice =
     product && product.price != null && product.price > 0
       ? product.price
       : product?.originalPrice ?? 0;
   const showDiscount =
+    showListedPrice &&
     product &&
     product.price != null &&
     product.price > 0 &&
     product.originalPrice > product.price;
+  const customizationContactHref = product
+    ? `/contact-us?customization=${encodeURIComponent(product.name)}#contact-form`
+    : '/contact-us#contact-form';
 
   const categoryLine = product?.categories?.map((c) => c.title).filter(Boolean).join(' · ');
   const primaryCat = product?.categories?.[0];
@@ -519,29 +527,35 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
 
                 <hr className="my-4 border-gray-200" />
 
-                <div className="mb-4 lg:hidden">
-                  <p className="text-2xl font-normal text-[#E36630]">
-                    PKR {displayPrice.toLocaleString()}
-                  </p>
-                  {showDiscount && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      List Price:{' '}
-                      <span className="line-through">PKR {product.originalPrice.toLocaleString()}</span>
-                    </p>
-                  )}
-                </div>
+                {showListedPrice ? (
+                  <>
+                    <div className="mb-4 lg:hidden">
+                      <p className="text-2xl font-normal text-[#E36630]">
+                        PKR {displayPrice.toLocaleString()}
+                      </p>
+                      {showDiscount && (
+                        <p className="mt-1 text-sm text-gray-500">
+                          List Price:{' '}
+                          <span className="line-through">PKR {product.originalPrice.toLocaleString()}</span>
+                        </p>
+                      )}
+                    </div>
 
-                <div className="hidden lg:block mb-4">
-                  <p className="text-3xl font-normal text-[#E36630]">
-                    PKR {displayPrice.toLocaleString()}
-                  </p>
-                  {showDiscount && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      List Price:{' '}
-                      <span className="line-through">PKR {product.originalPrice.toLocaleString()}</span>
-                    </p>
-                  )}
-                </div>
+                    <div className="mb-4 hidden lg:block">
+                      <p className="text-3xl font-normal text-[#E36630]">
+                        PKR {displayPrice.toLocaleString()}
+                      </p>
+                      {showDiscount && (
+                        <p className="mt-1 text-sm text-gray-500">
+                          List Price:{' '}
+                          <span className="line-through">PKR {product.originalPrice.toLocaleString()}</span>
+                        </p>
+                      )}
+                    </div>
+                  </>
+                ) : isCustomization ? (
+                  <p className="mb-4 text-lg font-medium text-[#0F4C69]">Contact us for customization pricing</p>
+                ) : null}
 
                 <div>
                   <h2 className="text-base font-bold text-gray-900">About this item</h2>
@@ -583,14 +597,24 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
               </section>
             )}
 
-            <div className="mt-6">
-              <ProductBuyRow
-                stock={product.stock}
-                quantity={quantity}
-                setQuantity={setQuantity}
-                onAddToCart={handleAddToCart}
-                onBuyNow={handleBuyItNow}
-              />
+            <div className="mt-6 space-y-3">
+              {isCustomization ? (
+                <Link
+                  href={customizationContactHref}
+                  className="flex w-full items-center justify-center rounded-lg bg-[#0F4C69] px-5 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#0d4259]"
+                >
+                  Request customization
+                </Link>
+              ) : null}
+              {showListedPrice || !isCustomization ? (
+                <ProductBuyRow
+                  stock={product.stock}
+                  quantity={quantity}
+                  setQuantity={setQuantity}
+                  onAddToCart={handleAddToCart}
+                  onBuyNow={handleBuyItNow}
+                />
+              ) : null}
             </div>
           </div>
         </div>

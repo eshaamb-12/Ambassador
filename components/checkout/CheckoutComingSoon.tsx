@@ -37,7 +37,7 @@ const CheckoutComingSoon = () => {
             Browse Products
           </Link>
           <Link
-            href="/contact-us"
+            href="/contact"
             className="rounded-lg border border-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-[#0F4C69]/30 hover:text-[#0F4C69] sm:text-base"
           >
             Contact Us

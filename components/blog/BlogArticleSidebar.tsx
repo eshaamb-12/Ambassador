@@ -64,7 +64,7 @@ export default function BlogArticleSidebar({
             View Products
           </Link>
           <Link
-            href="/contact-us"
+            href="/contact"
             className="inline-flex justify-center rounded-xl border border-white/40 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
           >
             Contact Us

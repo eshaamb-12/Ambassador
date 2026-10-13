@@ -157,7 +157,7 @@ const BranchModal = ({ branch, onClose, onGetDirections }: BranchModalProps) => 
                 Get Directions
               </button>
               <a
-                href="/contact-us"
+                href="/contact"
                 className="flex-1 rounded-xl border-2 border-[#0F4C69] py-3 px-4 text-sm font-semibold text-[#0F4C69] text-center hover:bg-[#0F4C69] hover:text-white transition-colors"
               >
                 Contact This Branch

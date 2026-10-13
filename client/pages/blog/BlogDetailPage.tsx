@@ -108,7 +108,7 @@ const BlogDetailPage = ({ post }: BlogDetailPageProps) => {
                 More Articles
               </Link>
               <Link
-                href="/contact-us"
+                href="/contact"
                 className="inline-flex rounded-xl bg-[#E36630] px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#cc5a2a]"
               >
                 Contact Our Team

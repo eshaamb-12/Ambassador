@@ -111,7 +111,7 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
     primaryCta: 'See How Custom Kitchen Works',
     primaryCtaHref: '/custom-kitchen',
     secondaryCta: 'Request a Consultation',
-    secondaryCtaHref: '/contact-us',
+    secondaryCtaHref: '/contact',
     footerLinkText: 'Custom Kitchen Services',
   },
   stats: {
@@ -232,7 +232,7 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
     primaryCta: 'Browse All Products',
     primaryCtaHref: PRODUCTS_PATH,
     secondaryCta: 'Request a Quote',
-    secondaryCtaHref: '/contact-us',
+    secondaryCtaHref: '/contact',
     trustItems: [
       { label: '500+ Products', sub: 'In Stock & Ready' },
       { label: 'Fast Delivery', sub: 'Nationwide Coverage' },

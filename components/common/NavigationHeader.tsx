@@ -31,7 +31,7 @@ const moreMenuItems = [
   { name: 'Blog',       href: '/blog' },
   { name: 'Gallery',    href: '/gallery' },
   { name: 'Showrooms',  href: '/branches' },
-  { name: 'Contact Us', href: '/contact-us' },
+  { name: 'Contact Us', href: '/contact' },
 ];
 
 

@@ -357,8 +357,8 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
     product.price > 0 &&
     product.originalPrice > product.price;
   const customizationContactHref = product
-    ? `/contact-us?customization=${encodeURIComponent(product.name)}#contact-form`
-    : '/contact-us#contact-form';
+    ? `/contact?customization=${encodeURIComponent(product.name)}#contact-form`
+    : '/contact#contact-form';
 
   const categoryLine = product?.categories?.map((c) => c.title).filter(Boolean).join(' · ');
   const primaryCat = product?.categories?.[0];

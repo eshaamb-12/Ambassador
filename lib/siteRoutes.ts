@@ -16,6 +16,9 @@ export const CAREERS_JOBS_PATH = '/careers/jobs';
 /** Public blog listing. */
 export const BLOG_PATH = '/blog';
 
+/** Contact page (form, branches info). */
+export const CONTACT_PATH = '/contact';
+
 export function blogDetailPath(slug: string): string {
   const clean = slug.trim().toLowerCase();
   return `${BLOG_PATH}/${encodeURIComponent(clean)}`;

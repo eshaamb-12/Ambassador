@@ -19,7 +19,7 @@ type StaticPage = {
 const STATIC_PAGES: StaticPage[] = [
   { path: '/', priority: 1, changeFrequency: 'daily' },
   { path: '/about', priority: 0.8, changeFrequency: 'monthly' },
-  { path: '/contact-us', priority: 0.7, changeFrequency: 'monthly' },
+  { path: '/contact', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/branches', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/gallery', priority: 0.7, changeFrequency: 'weekly' },
   { path: '/custom-kitchen', priority: 0.8, changeFrequency: 'weekly' },

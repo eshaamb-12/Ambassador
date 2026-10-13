@@ -107,8 +107,9 @@ function ProductBuyRow({
   onAddToCart: () => void;
   onBuyNow: () => void;
 }) {
-  const inStock = stock > 0;
-  const maxQty = Math.max(1, stock || 10);
+  if (stock <= 0) return null;
+
+  const maxQty = Math.max(1, stock);
 
   return (
     <div className="flex flex-wrap items-center gap-4">
@@ -116,7 +117,7 @@ function ProductBuyRow({
         <button
           type="button"
           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-          disabled={!inStock || quantity <= 1}
+          disabled={quantity <= 1}
           className="px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-40"
           aria-label="Decrease quantity"
         >
@@ -127,15 +128,14 @@ function ProductBuyRow({
           value={quantity}
           min={1}
           max={maxQty}
-          disabled={!inStock}
           onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-          className="w-16 border-none bg-transparent text-center text-sm font-semibold text-gray-800 focus:outline-none disabled:opacity-50"
+          className="w-16 border-none bg-transparent text-center text-sm font-semibold text-gray-800 focus:outline-none"
           aria-label="Quantity"
         />
         <button
           type="button"
           onClick={() => setQuantity(Math.min(maxQty, quantity + 1))}
-          disabled={!inStock || quantity >= maxQty}
+          disabled={quantity >= maxQty}
           className="px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-40"
           aria-label="Increase quantity"
         >
@@ -145,16 +145,14 @@ function ProductBuyRow({
       <button
         type="button"
         onClick={onAddToCart}
-        disabled={!inStock}
-        className="min-w-[140px] flex-1 rounded-lg border-2 border-[#0F4C69] px-5 py-3 text-sm font-medium text-[#0F4C69] transition-colors hover:bg-[#0F4C69] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-w-[140px] flex-1 rounded-lg border-2 border-[#0F4C69] px-5 py-3 text-sm font-medium text-[#0F4C69] transition-colors hover:bg-[#0F4C69] hover:text-white"
       >
         Add to Cart
       </button>
       <button
         type="button"
         onClick={onBuyNow}
-        disabled={!inStock}
-        className="min-w-[140px] flex-1 rounded-lg bg-[#E36630] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#cc5a2a] disabled:cursor-not-allowed disabled:opacity-50"
+        className="min-w-[140px] flex-1 rounded-lg bg-[#E36630] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#cc5a2a]"
       >
         Buy it Now
       </button>
@@ -606,7 +604,7 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
                   Request customization
                 </Link>
               ) : null}
-              {showListedPrice || !isCustomization ? (
+              {(showListedPrice || !isCustomization) && product.stock > 0 ? (
                 <ProductBuyRow
                   stock={product.stock}
                   quantity={quantity}

@@ -119,13 +119,19 @@ function formatBrandLabels(slugs: string[]): string {
   return [...ordered, ...unknown].join(' · ');
 }
 
-type ProductFeatureFilterKey = 'freeShipping' | 'onSale' | 'newArrival' | 'bestSeller';
+type ProductFeatureFilterKey =
+  | 'freeShipping'
+  | 'onSale'
+  | 'newArrival'
+  | 'bestSeller'
+  | 'customization';
 
 const FEATURE_FILTERS: { key: ProductFeatureFilterKey; label: string; apiFlag: string }[] = [
   { key: 'freeShipping', label: 'Free Shipping', apiFlag: 'free_shipping' },
   { key: 'onSale', label: 'On Sale', apiFlag: 'on_sale' },
   { key: 'newArrival', label: 'New Arrival', apiFlag: 'new_arrival' },
   { key: 'bestSeller', label: 'Best Seller', apiFlag: 'best_seller' },
+  { key: 'customization', label: 'Customization', apiFlag: 'customization' },
 ];
 
 const ALL = 'All Categories';
@@ -308,6 +314,7 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
       onSale:       f.includes('on_sale'),
       newArrival:   f.includes('new_arrival'),
       bestSeller:   f.includes('best_seller'),
+      customization: f.includes('customization'),
     };
   });
   const [brands, setBrands] = useState<Record<BrandFilterKey, boolean>>(() => {
@@ -613,6 +620,7 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
       onSale: false,
       newArrival: false,
       bestSeller: false,
+      customization: false,
     });
     setBrands({
       ambassador: false,

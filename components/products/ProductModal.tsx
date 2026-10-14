@@ -1294,7 +1294,8 @@ const ProductModal: React.FC<ProductModalProps> = ({
               <div>
                 <h3 className="text-sm font-semibold text-gray-700">Technical Specifications</h3>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  Add specs for this product. Drag rows to set the order shown on the product page.
+                  Add a keyword (label) for each row; value is optional. Drag rows to set the order on the
+                  product page.
                 </p>
               </div>
               <button type="button" onClick={addSpec}
@@ -1317,8 +1318,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
               <div className="space-y-2">
                 <div className="grid grid-cols-[28px_1fr_1fr_32px] gap-2 px-1">
                   <span aria-hidden />
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Name</span>
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Value</span>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Keyword</span>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Value <span className="normal-case font-normal text-gray-400">(optional)</span>
+                  </span>
                   <span />
                 </div>
                 {specRows.map(row => (
@@ -1344,12 +1347,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     </span>
                     <input type="text" value={row.key}
                       onChange={e => updateSpec(row.id, 'key', e.target.value)}
-                      placeholder="e.g. Material"
+                      placeholder="e.g. Material, Voltage, Warranty"
                       draggable={false}
                       className={inputCls(false) + ' text-xs cursor-text'} />
                     <input type="text" value={row.value}
                       onChange={e => updateSpec(row.id, 'value', e.target.value)}
-                      placeholder="e.g. Stainless Steel"
+                      placeholder="Optional — leave blank if not set"
                       draggable={false}
                       className={inputCls(false) + ' text-xs cursor-text'} />
                     <button type="button" onClick={() => removeSpec(row.id)}

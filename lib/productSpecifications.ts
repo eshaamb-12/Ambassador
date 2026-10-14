@@ -6,7 +6,7 @@ export function orderProductSpecifications(
   if (!specs || typeof specs !== 'object') return {};
 
   const entries = Object.entries(specs).filter(
-    ([, value]) => value != null && String(value).trim() !== '',
+    ([key]) => key != null && String(key).trim() !== '',
   );
 
   if (!productOrder?.length) {

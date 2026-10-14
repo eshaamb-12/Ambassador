@@ -575,7 +575,7 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
                           className="flex gap-3 border-t border-gray-100 py-2.5 text-sm"
                         >
                           <span className="w-[42%] shrink-0 font-semibold text-gray-900">{key}</span>
-                          <span className="text-gray-700">{value}</span>
+                          <span className="text-gray-700">{value?.trim() ? value : '—'}</span>
                         </div>
                       ))}
                     </div>

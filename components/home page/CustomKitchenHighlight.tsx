@@ -4,6 +4,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
 import type { HomeCustomKitchenContent } from '@/lib/sitePages.types';
+import {
+  homeButtonCta,
+  homeButtonCompact,
+  homeCardBodyOnDark,
+  homeCardTitle,
+  homeSectionDescriptionOnDark,
+  homeSectionEyebrowOnDark,
+  homeSectionTitleOnDark,
+} from '@/lib/homeSectionTypography';
 
 interface CustomKitchenHighlightProps {
   content?: HomeCustomKitchenContent;
@@ -32,24 +41,24 @@ const CustomKitchenHighlight = ({ content: contentProp }: CustomKitchenHighlight
                 priority={false}
               />
             </div>
-            <div className="absolute -bottom-2.5 left-0 max-w-[calc(100%-1rem)] rounded-lg bg-[#E36630] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide shadow-lg sm:-bottom-3 sm:left-0 sm:max-w-none sm:rounded-xl sm:px-4 sm:py-2 sm:text-xs md:-bottom-4 md:left-4 md:px-5 md:text-sm">
+            <div className={`absolute -bottom-2.5 left-0 max-w-[calc(100%-1rem)] rounded-lg bg-[#E36630] px-3 py-1.5 uppercase tracking-wide shadow-lg sm:-bottom-3 sm:left-0 sm:max-w-none sm:rounded-xl sm:px-4 sm:py-2 md:-bottom-4 md:left-4 md:px-5 ${homeButtonCompact} text-white`}>
               {content.imageBadge}
             </div>
           </div>
 
           <div className="order-1 space-y-5 sm:space-y-6 lg:order-2">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#E36630]/90 sm:gap-2 sm:text-sm sm:tracking-widest">
+              <span className={`inline-flex items-center gap-1.5 sm:gap-2 ${homeSectionEyebrowOnDark}`}>
                 <span className="h-px w-5 bg-[#E36630] sm:w-8" />
                 {content.eyebrow}
                 <span className="h-px w-5 bg-[#E36630] sm:w-8" />
               </span>
-              <h2 className="mt-3 text-2xl font-bold leading-tight sm:mt-4 sm:text-3xl md:text-4xl lg:text-[2.65rem]">
+              <h2 className={`mt-3 sm:mt-4 ${homeSectionTitleOnDark}`}>
                 {content.titleBefore}{' '}
                 <span className="text-[#E36630]">{content.titleHighlight}</span>{' '}
                 <span className="text-white">{content.titleAfter}</span>
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-white/75 sm:mt-4 sm:text-base md:text-lg">
+              <p className={`mt-3 sm:mt-4 ${homeSectionDescriptionOnDark}`}>
                 {content.description}
               </p>
             </div>
@@ -57,8 +66,8 @@ const CustomKitchenHighlight = ({ content: contentProp }: CustomKitchenHighlight
             <ul className="space-y-3 border-l-2 border-[#E36630]/50 pl-3.5 sm:space-y-3.5 sm:pl-4 md:space-y-4 md:pl-5">
               {content.highlights.map((item) => (
                 <li key={item.title}>
-                  <h3 className="text-sm font-semibold text-white sm:text-base">{item.title}</h3>
-                  <p className="mt-0.5 text-xs leading-snug text-white/65 sm:text-sm">{item.text}</p>
+                  <h3 className={`font-semibold text-white ${homeCardTitle}`}>{item.title}</h3>
+                  <p className={`mt-0.5 leading-snug ${homeCardBodyOnDark}`}>{item.text}</p>
                 </li>
               ))}
             </ul>
@@ -66,18 +75,18 @@ const CustomKitchenHighlight = ({ content: contentProp }: CustomKitchenHighlight
             <div className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:pt-2">
               <Link
                 href={content.primaryCtaHref}
-                className="inline-flex w-full justify-center rounded-lg bg-[#E36630] px-5 py-3 text-center text-xs font-semibold text-white shadow-lg shadow-orange-950/40 transition-colors hover:bg-[#cc5a2a] sm:w-auto sm:px-7 sm:py-3.5 sm:text-sm md:text-base"
+                className={`inline-flex w-full justify-center rounded-lg bg-[#E36630] px-5 py-3 text-center text-white shadow-lg shadow-orange-950/40 transition-colors hover:bg-[#cc5a2a] sm:w-auto sm:px-7 sm:py-3.5 ${homeButtonCta}`}
               >
                 {content.primaryCta}
               </Link>
               <Link
                 href={content.secondaryCtaHref}
-                className="inline-flex w-full justify-center rounded-lg border-2 border-white/35 bg-white/5 px-5 py-3 text-center text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:border-white/60 hover:bg-white/10 sm:w-auto sm:px-7 sm:py-3.5 sm:text-sm md:text-base"
+                className={`inline-flex w-full justify-center rounded-lg border-2 border-white/35 bg-white/5 px-5 py-3 text-center text-white backdrop-blur-sm transition-colors hover:border-white/60 hover:bg-white/10 sm:w-auto sm:px-7 sm:py-3.5 ${homeButtonCta}`}
               >
                 {content.secondaryCta}
               </Link>
             </div>
-            <p className="text-[11px] leading-relaxed text-white/45 sm:text-xs md:text-sm">
+            <p className={`leading-relaxed text-white/45 ${homeCardBodyOnDark}`}>
               Same journey and portfolio detail on our{' '}
               <Link
                 href={content.primaryCtaHref}

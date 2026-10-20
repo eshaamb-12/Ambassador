@@ -1,6 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+  type Dispatch,
+  type MutableRefObject,
+  type RefObject,
+  type SetStateAction,
+} from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -159,15 +169,15 @@ const PAGE_SIZE = 12;
   const detailHref = productDetailPath(productUrlSegment(product), product.categorySlug);
 
   return (
-    <article className="flex flex-col gap-4 py-4 sm:flex-row sm:items-start sm:gap-6">
-      <div className="relative mx-auto h-[260px] w-[260px] shrink-0 overflow-hidden bg-[#F3F3F3] shadow-md sm:mx-0 md:h-[300px] md:w-[300px]">
+    <article className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:gap-5 md:gap-6">
+      <div className="relative h-[min(58vw,280px)] w-full shrink-0 overflow-hidden rounded-xl bg-[#F3F3F3] sm:aspect-square sm:h-auto sm:w-[220px] sm:rounded-lg sm:shadow-md md:w-[260px] lg:w-[300px]">
         <Link href={detailHref} className="block h-full w-full">
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-contain"
-            sizes="(max-width: 768px) 260px, 300px"
+            className="object-contain p-2 sm:p-3"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 220px, 300px"
           />
         </Link>
         <WishlistButton productId={product._id} />
@@ -175,7 +185,7 @@ const PAGE_SIZE = 12;
 
       <div className="min-w-0 flex-1">
         <Link href={detailHref} className="block">
-          <h3 className="line-clamp-2 text-lg font-bold leading-snug text-[#0F4C69] hover:text-[#E36630] hover:underline sm:text-xl md:text-[1.35rem]">
+          <h3 className="line-clamp-2 text-base font-bold leading-snug text-[#0F4C69] hover:text-[#E36630] hover:underline sm:text-lg md:text-xl">
             {product.name}
           </h3>
         </Link>
@@ -202,12 +212,12 @@ const PAGE_SIZE = 12;
           </span>
         ) : null}
 
-        <p className="mt-2 line-clamp-4 text-base leading-relaxed text-gray-700 sm:text-[1.05rem]">
+        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-gray-700 sm:line-clamp-4 sm:text-base">
           {product.description || 'No description available for this product.'}
         </p>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-2">
-          <span className="text-2xl font-normal text-[#E36630]">
+          <span className="text-xl font-semibold text-[#E36630] sm:text-2xl">
             PKR {product.price.toLocaleString()}
           </span>
           {showStrike ? (
@@ -222,12 +232,12 @@ const PAGE_SIZE = 12;
           ) : null}
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <button
             type="button"
             onClick={onAddToCart}
             disabled={product.stock <= 0}
-            className="rounded-xl bg-[#E36630] px-5 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#cc5a2a] disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full rounded-xl bg-[#E36630] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#cc5a2a] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:py-2"
           >
             Add to Cart
           </button>
@@ -235,7 +245,7 @@ const PAGE_SIZE = 12;
             type="button"
             onClick={onBuyItNow}
             disabled={product.stock <= 0}
-            className="rounded-xl border-2 border-[#0F4C69] px-4 py-2 text-sm font-semibold text-[#0F4C69] transition-colors hover:bg-[#0F4C69] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="w-full rounded-xl border-2 border-[#0F4C69] px-4 py-2.5 text-sm font-semibold text-[#0F4C69] transition-colors hover:bg-[#0F4C69] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:py-2"
           >
             Buy it Now
           </button>
@@ -246,6 +256,183 @@ const PAGE_SIZE = 12;
 }
 
 type CategoryMeta = { title: string; slug: string };
+
+type ProductsFilterSidebarProps = {
+  categories: string[];
+  activeCategory: string;
+  categoryListScrollRef: RefObject<HTMLDivElement | null>;
+  categoryOptionRefs: MutableRefObject<Map<string, HTMLLabelElement>>;
+  onSelectCategory: (value: string) => void;
+  features: Record<ProductFeatureFilterKey, boolean>;
+  onFeatureChange: (feature: ProductFeatureFilterKey, checked: boolean) => void;
+  brands: Record<BrandFilterKey, boolean>;
+  onBrandChange: (key: BrandFilterKey, checked: boolean) => void;
+  availability: { readyToShip: boolean; customOrder: boolean };
+  onAvailabilityChange: (key: string, checked: boolean) => void;
+  priceRange: { min: number; max: number };
+  setPriceRange: Dispatch<SetStateAction<{ min: number; max: number }>>;
+  onClearAll: () => void;
+  showHeader?: boolean;
+  className?: string;
+};
+
+function ProductsFilterSidebar({
+  categories,
+  activeCategory,
+  categoryListScrollRef,
+  categoryOptionRefs,
+  onSelectCategory,
+  features,
+  onFeatureChange,
+  brands,
+  onBrandChange,
+  availability,
+  onAvailabilityChange,
+  priceRange,
+  setPriceRange,
+  onClearAll,
+  showHeader = true,
+  className = '',
+}: ProductsFilterSidebarProps) {
+  return (
+    <div className={className}>
+      {showHeader ? (
+        <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3">
+          <h2 className="text-base font-bold text-gray-900">Filters</h2>
+          <button
+            type="button"
+            onClick={onClearAll}
+            className="text-xs font-medium text-[#0F4C69] hover:text-[#E36630] hover:underline"
+          >
+            Clear all
+          </button>
+        </div>
+      ) : null}
+
+      <div className="mb-4 border-b border-gray-200 pb-4">
+        <h3 className="mb-3 text-sm font-bold text-gray-900">Category</h3>
+        <div ref={categoryListScrollRef} className="max-h-48 space-y-2 overflow-y-auto pr-1 sm:max-h-56 lg:max-h-64">
+          {categories.map((category) => (
+            <label
+              key={category}
+              ref={(node) => {
+                if (node) categoryOptionRefs.current.set(category, node);
+                else categoryOptionRefs.current.delete(category);
+              }}
+              className="flex cursor-pointer items-center gap-2 py-0.5"
+            >
+              <input
+                type="radio"
+                name="category"
+                value={category}
+                checked={activeCategory === category}
+                onChange={(e) => onSelectCategory(e.target.value)}
+                className="accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
+              />
+              <span className="text-sm text-gray-700">{category}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4 border-b border-gray-200 pb-4">
+        <h3 className="mb-3 text-sm font-bold text-gray-900">Features</h3>
+        <div className="space-y-2">
+          {FEATURE_FILTERS.map(({ key, label }) => (
+            <label key={key} className="flex cursor-pointer items-center gap-2 py-0.5">
+              <input
+                type="checkbox"
+                checked={features[key]}
+                onChange={(e) => onFeatureChange(key, e.target.checked)}
+                className="accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4 border-b border-gray-200 pb-4">
+        <h3 className="mb-3 text-sm font-bold text-gray-900">Brand</h3>
+        <div className="space-y-2">
+          {BRAND_FILTERS.map(({ key, label }) => (
+            <label key={key} className="flex cursor-pointer items-center gap-2 py-0.5">
+              <input
+                type="checkbox"
+                checked={brands[key]}
+                onChange={(e) => onBrandChange(key, e.target.checked)}
+                className="accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
+              />
+              <span className="text-sm text-gray-700">{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-4 border-b border-gray-200 pb-4">
+        <h3 className="mb-3 text-sm font-bold text-gray-900">Availability</h3>
+        <div className="space-y-2">
+          <label className="flex cursor-pointer items-center gap-2 py-0.5">
+            <input
+              type="checkbox"
+              checked={availability.readyToShip}
+              onChange={(e) => onAvailabilityChange('readyToShip', e.target.checked)}
+              className="accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
+            />
+            <span className="text-sm text-gray-700">Ready to Ship</span>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 py-0.5">
+            <input
+              type="checkbox"
+              checked={availability.customOrder}
+              onChange={(e) => onAvailabilityChange('customOrder', e.target.checked)}
+              className="accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
+            />
+            <span className="text-sm text-gray-700">Custom Order</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-3 text-sm font-bold text-gray-900">Price Range</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs text-gray-600">
+              Min: PKR {priceRange.min.toLocaleString()}
+            </label>
+            <input
+              type="range"
+              min={0}
+              max={500000}
+              step={1000}
+              value={priceRange.min}
+              onChange={(e) =>
+                setPriceRange({ ...priceRange, min: parseInt(e.target.value, 10) })
+              }
+              className="w-full"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-600">
+              Max: PKR {priceRange.max > 0 ? priceRange.max.toLocaleString() : 'Any'}
+            </label>
+            <input
+              type="range"
+              min={0}
+              max={500000}
+              step={1000}
+              value={priceRange.max}
+              onChange={(e) =>
+                setPriceRange({ ...priceRange, max: parseInt(e.target.value, 10) })
+              }
+              className="w-full"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function pageFromSearchParams(sp: URLSearchParams): number {
   const n = parseInt(sp.get('page') || '1', 10);
@@ -328,6 +515,7 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
 
   const [showCartPopup, setShowCartPopup] = useState(false);
   const [addedProduct,  setAddedProduct]  = useState<Product | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const { addToCart } = useCart();
 
   const slugPath = useMemo(
@@ -362,6 +550,47 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
     const option = categoryOptionRefs.current.get(activeCategory);
     option?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [activeCategory, categories]);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (activeCategory !== ALL) count += 1;
+    if (Object.values(features).some(Boolean)) {
+      count += Object.values(features).filter(Boolean).length;
+    }
+    if (Object.values(brands).some(Boolean)) {
+      count += Object.values(brands).filter(Boolean).length;
+    }
+    if (availability.readyToShip || availability.customOrder) {
+      count += Number(availability.readyToShip) + Number(availability.customOrder);
+    }
+    if (priceRange.min > 0 || priceRange.max > 0) count += 1;
+    return count;
+  }, [activeCategory, features, brands, availability, priceRange]);
+
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileFiltersOpen]);
+
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileFiltersOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mobileFiltersOpen]);
+
+  const handleSelectCategory = useCallback((value: string) => {
+    preferAllCategories.current = value === ALL;
+    setSelectedCategory(value);
+    setSearchTerm('');
+    filtersReadyFromUrl.current = true;
+  }, []);
 
   const buildListingPath = useCallback(
     (overrides: Record<string, string> = {}) => {
@@ -632,6 +861,23 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
     });
   };
 
+  const filterSidebarProps: ProductsFilterSidebarProps = {
+    categories,
+    activeCategory,
+    categoryListScrollRef,
+    categoryOptionRefs,
+    onSelectCategory: handleSelectCategory,
+    features,
+    onFeatureChange: handleFeatureChange,
+    brands,
+    onBrandChange: handleBrandChange,
+    availability,
+    onAvailabilityChange: handleAvailabilityChange,
+    priceRange,
+    setPriceRange,
+    onClearAll: clearFilters,
+  };
+
   if (loadError && !loading && products.length === 0) {
     return (
       <div className="min-h-screen bg-gray-100 py-8">
@@ -686,7 +932,24 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
                 </>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(true)}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm transition-colors hover:border-[#E36630] hover:text-[#E36630] lg:hidden sm:flex-none"
+                aria-expanded={mobileFiltersOpen}
+                aria-controls="products-mobile-filters"
+              >
+                <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M10 12h4" />
+                </svg>
+                Filters
+                {activeFilterCount > 0 ? (
+                  <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#E36630] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+              </button>
               <label htmlFor="products-sort" className="text-sm text-gray-700 whitespace-nowrap">
                 Sort by:
               </label>
@@ -694,7 +957,7 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
                 id="products-sort"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="min-w-[10rem] rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 outline-none focus:border-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
+                className="min-w-0 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-900 outline-none focus:border-[#E36630] focus:ring-2 focus:ring-[#E36630]/35 sm:min-w-[10rem] sm:flex-none sm:py-1.5"
               >
                 <option value="random">Featured Mix</option>
                 <option value="newest">Newest First</option>
@@ -709,150 +972,9 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
 
       <div className="container mx-auto max-w-[1600px]">
         <div className="flex flex-col lg:flex-row">
-          <aside className="w-full shrink-0 border-b border-gray-200 px-4 py-4 lg:w-60 lg:border-b-0 lg:border-r lg:px-5 xl:w-64">
-            <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-3">
-              <h2 className="text-base font-bold text-gray-900">Filters</h2>
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-xs font-medium text-[#0F4C69] hover:text-[#E36630] hover:underline"
-              >
-                Clear all
-              </button>
-            </div>
-
-              <div className="mb-4 border-b border-gray-200 pb-4">
-                <h3 className="mb-3 text-sm font-bold text-gray-900">Category</h3>
-                <div ref={categoryListScrollRef} className="max-h-64 space-y-2 overflow-y-auto pr-1">
-                  {categories.map((category) => (
-                    <label
-                      key={category}
-                      ref={(node) => {
-                        if (node) categoryOptionRefs.current.set(category, node);
-                        else categoryOptionRefs.current.delete(category);
-                      }}
-                      className="flex items-center"
-                    >
-                      <input
-                        type="radio"
-                        name="category"
-                        value={category}
-                        checked={activeCategory === category}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          preferAllCategories.current = value === ALL;
-                          setSelectedCategory(value);
-                          setSearchTerm('');
-                          filtersReadyFromUrl.current = true;
-                        }}
-                        className="mr-2 accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
-                      />
-                      <span className="text-sm text-gray-700">{category}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-4 border-b border-gray-200 pb-4">
-                <h3 className="mb-3 text-sm font-bold text-gray-900">Features</h3>
-                <div className="space-y-2">
-                  {FEATURE_FILTERS.map(({ key, label }) => (
-                    <label key={key} className="flex cursor-pointer items-center">
-                      <input
-                        type="checkbox"
-                        checked={features[key]}
-                        onChange={(e) => handleFeatureChange(key, e.target.checked)}
-                        className="mr-2 accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
-                      />
-                      <span className="text-sm text-gray-700">{label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-4 border-b border-gray-200 pb-4">
-                <h3 className="mb-3 text-sm font-bold text-gray-900">Brand</h3>
-                <div className="space-y-2">
-                  {BRAND_FILTERS.map(({ key, label }) => (
-                    <label key={key} className="flex cursor-pointer items-center">
-                      <input
-                        type="checkbox"
-                        checked={brands[key]}
-                        onChange={(e) => handleBrandChange(key, e.target.checked)}
-                        className="mr-2 accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
-                      />
-                      <span className="text-sm text-gray-700">{label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-4 border-b border-gray-200 pb-4">
-                <h3 className="mb-3 text-sm font-bold text-gray-900">Availability</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={availability.readyToShip}
-                      onChange={(e) => handleAvailabilityChange('readyToShip', e.target.checked)}
-                      className="mr-2 accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
-                    />
-                    <span className="text-sm text-gray-700">Ready to Ship</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={availability.customOrder}
-                      onChange={(e) => handleAvailabilityChange('customOrder', e.target.checked)}
-                      className="mr-2 accent-[#E36630] focus:ring-2 focus:ring-[#E36630]/35"
-                    />
-                    <span className="text-sm text-gray-700">Custom Order</span>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="mb-3 text-sm font-bold text-gray-900">Price Range</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs text-gray-600">
-                      Min: PKR {priceRange.min.toLocaleString()}
-                    </label>
-                    <input
-                      type="range"
-                      min={0}
-                      max={500000}
-                      step={1000}
-                      value={priceRange.min}
-                      onChange={(e) =>
-                        setPriceRange({ ...priceRange, min: parseInt(e.target.value, 10) })
-                      }
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-600">
-                      Max: PKR {priceRange.max > 0 ? priceRange.max.toLocaleString() : 'Any'}
-                    </label>
-                    <input
-                      type="range"
-                      min={0}
-                      max={500000}
-                      step={1000}
-                      value={priceRange.max}
-                      onChange={(e) =>
-                        setPriceRange({ ...priceRange, max: parseInt(e.target.value, 10) })
-                      }
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-          </aside>
-
-          <main className="min-w-0 flex-1 px-4 py-4 lg:px-6">
-            <h2 className="text-lg font-bold text-gray-900">Results</h2>
-            <p className="mt-1 text-xs text-gray-500">
+          <main className="order-1 min-w-0 flex-1 px-4 py-4 pb-24 lg:order-2 lg:px-6 lg:pb-4">
+            <h2 className="text-base font-bold text-gray-900 sm:text-lg">Results</h2>
+            <p className="mt-1 text-xs text-gray-500 sm:text-sm">
               Check each product page for other buying options. Prices and availability may vary.
             </p>
 
@@ -932,8 +1054,69 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
               );
             })()}
           </main>
+
+          <aside className="order-2 hidden shrink-0 lg:order-1 lg:block lg:w-60 lg:border-r lg:border-gray-200 lg:px-5 xl:w-64">
+            <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto py-4 pr-1">
+              <ProductsFilterSidebar {...filterSidebarProps} />
+            </div>
+          </aside>
         </div>
       </div>
+
+      {mobileFiltersOpen ? (
+        <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-labelledby="products-mobile-filters-title">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/45"
+            aria-label="Close filters"
+            onClick={() => setMobileFiltersOpen(false)}
+          />
+          <div
+            id="products-mobile-filters"
+            className="absolute inset-y-0 left-0 flex w-[min(100%,20rem)] flex-col bg-white shadow-xl"
+          >
+            <div className="flex items-center justify-between gap-2 border-b border-gray-200 px-4 py-3">
+              <h2 id="products-mobile-filters-title" className="min-w-0 text-base font-bold text-gray-900">
+                Filters
+                {activeFilterCount > 0 ? (
+                  <span className="ml-1 text-sm font-medium text-[#E36630]">({activeFilterCount})</span>
+                ) : null}
+              </h2>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-xs font-medium text-[#0F4C69] hover:text-[#E36630] hover:underline"
+                >
+                  Clear all
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileFiltersOpen(false)}
+                  className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                  aria-label="Close filters panel"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-4 pb-28">
+              <ProductsFilterSidebar {...filterSidebarProps} showHeader={false} />
+            </div>
+            <div className="border-t border-gray-200 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(false)}
+                className="w-full rounded-xl bg-[#0F4C69] py-3 text-sm font-bold text-white transition-colors hover:bg-[#0d3d55]"
+              >
+                Show results
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <CartPopup
         show={showCartPopup}

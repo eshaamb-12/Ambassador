@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
 import type { HomeCtaContent } from '@/lib/sitePages.types';
+import {
+  homeButtonCta,
+  homeButtonCompact,
+  homeCardBodyOnDark,
+  homeSectionDescriptionMutedOnDark,
+  homeSectionTitleOnDark,
+} from '@/lib/homeSectionTypography';
 
 const trustIcons = [
   {
@@ -68,29 +75,29 @@ const CTASection = ({ content: contentProp }: CTASectionProps) => {
     <section className="relative overflow-hidden bg-[#0F4C69] py-10 sm:py-12 md:py-20">
       <div className="container relative mx-auto px-4">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="mb-4 inline-block rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#E36630] sm:mb-6 sm:px-4 sm:text-sm">
+          <span className={`mb-4 inline-block rounded-full bg-white/10 px-3 py-1 uppercase tracking-wide text-[#E36630] sm:mb-6 sm:px-4 ${homeButtonCompact}`}>
             {content.badge}
           </span>
 
-          <h2 className="mb-4 px-1 text-2xl font-bold leading-tight text-white sm:mb-5 sm:text-3xl md:mb-6 md:text-5xl">
+          <h2 className={`mb-4 px-1 sm:mb-5 md:mb-6 ${homeSectionTitleOnDark}`}>
             {content.titleBefore}{' '}
             <span className="text-[#E36630]">{content.titleHighlight}</span>
           </h2>
 
-          <p className="mx-auto mb-8 max-w-2xl px-1 text-sm leading-relaxed text-white/60 sm:mb-10 sm:text-base md:text-lg">
+          <p className={`mx-auto mb-8 max-w-2xl px-1 sm:mb-10 ${homeSectionDescriptionMutedOnDark}`}>
             {content.description}
           </p>
 
           <div className="mb-10 flex flex-col justify-center gap-3 sm:mb-12 sm:flex-row sm:gap-4 md:mb-14">
             <Link
               href={content.primaryCtaHref}
-              className="w-full rounded-xl bg-[#E36630] px-6 py-3 text-center text-sm font-bold text-white shadow-lg transition-colors hover:bg-[#cc5a2a] sm:w-auto sm:px-8 sm:py-4 sm:text-base"
+              className={`w-full rounded-xl bg-[#E36630] px-6 py-3 text-center text-white shadow-lg transition-colors hover:bg-[#cc5a2a] sm:w-auto sm:px-8 sm:py-4 ${homeButtonCta}`}
             >
               {content.primaryCta}
             </Link>
             <Link
               href={content.secondaryCtaHref}
-              className="w-full rounded-xl border-2 border-white/20 px-6 py-3 text-center text-sm font-bold text-white transition-colors hover:border-[#E36630] hover:text-[#E36630] sm:w-auto sm:px-8 sm:py-4 sm:text-base"
+              className={`w-full rounded-xl border-2 border-white/20 px-6 py-3 text-center text-white transition-colors hover:border-[#E36630] hover:text-[#E36630] sm:w-auto sm:px-8 sm:py-4 ${homeButtonCta}`}
             >
               {content.secondaryCta}
             </Link>
@@ -116,8 +123,8 @@ const CTASection = ({ content: contentProp }: CTASectionProps) => {
                       {iconDef.icon}
                     </svg>
                   </span>
-                  <span className="text-center text-xs font-semibold text-white sm:text-sm">{item.label}</span>
-                  <span className="text-center text-[10px] text-white/60 sm:text-xs">{item.sub}</span>
+                  <span className={`text-center font-semibold text-white ${homeButtonCompact}`}>{item.label}</span>
+                  <span className={`text-center text-white/60 ${homeCardBodyOnDark}`}>{item.sub}</span>
                 </div>
               );
             })}

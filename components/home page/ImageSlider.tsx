@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
 import type { HomeHeroSlide } from '@/lib/sitePages.types';
+import { homeButtonCompact, homeSectionDescriptionOnDark } from '@/lib/homeSectionTypography';
 
 const SLIDE_DURATION = 8000; // ms per slide
 
@@ -116,20 +117,20 @@ export default function ImageSlider({ slides: slidesProp }: ImageSliderProps) {
       >
         <div key={animKey} className="w-full max-w-2xl">
           {slide.badge && (
-            <span className={`${textAnim.badge} mb-3 inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm sm:mb-4 sm:gap-2 sm:px-4 sm:py-1.5 sm:text-xs sm:tracking-widest`}>
+            <span className={`${textAnim.badge} mb-3 inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1 uppercase tracking-wide text-white backdrop-blur-sm sm:mb-4 sm:gap-2 sm:px-4 sm:py-1.5 sm:tracking-widest ${homeButtonCompact}`}>
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#E36630] animate-pulse" />
               <span className="truncate">{slide.badge}</span>
             </span>
           )}
 
           {slide.title && (
-            <TitleTag className={`${textAnim.title} mb-3 text-[1.625rem] font-extrabold leading-[1.15] tracking-tight text-white whitespace-pre-line drop-shadow-lg sm:mb-4 sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl`}>
+            <TitleTag className={`${textAnim.title} mb-3 text-2xl font-extrabold leading-[1.15] tracking-tight text-white whitespace-pre-line drop-shadow-lg sm:mb-4 sm:text-3xl md:text-4xl`}>
               {slide.title}
             </TitleTag>
           )}
 
           {slide.subtitle && (
-            <p className={`${textAnim.subtitle} mb-5 max-w-2xl text-xs leading-relaxed text-white/85 drop-shadow sm:mb-6 sm:text-sm md:mb-7 md:text-base lg:text-lg`}>
+            <p className={`${textAnim.subtitle} mb-5 max-w-2xl text-white/85 drop-shadow sm:mb-6 md:mb-7 ${homeSectionDescriptionOnDark}`}>
               {slide.subtitle}
             </p>
           )}
@@ -142,7 +143,7 @@ export default function ImageSlider({ slides: slidesProp }: ImageSliderProps) {
             >
               <Link
                 href={slide.ctaHref}
-                className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#E36630] px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#E36630]/30 transition-all duration-300 hover:bg-[#cc5a2a] hover:shadow-[#E36630]/50 hover:gap-3 sm:w-auto sm:px-6 sm:py-3 sm:text-sm"
+                className={`group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#E36630] px-5 py-2.5 text-white shadow-lg shadow-[#E36630]/30 transition-all duration-300 hover:bg-[#cc5a2a] hover:shadow-[#E36630]/50 hover:gap-3 sm:w-auto sm:px-6 sm:py-3 ${homeButtonCompact} font-bold`}
               >
                 {slide.cta}
                 <svg className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-1 sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +152,7 @@ export default function ImageSlider({ slides: slidesProp }: ImageSliderProps) {
               </Link>
               <Link
                 href="/about"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/40 bg-white/10 px-5 py-2.5 text-xs font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20 sm:w-auto sm:px-6 sm:py-3 sm:text-sm"
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/40 bg-white/10 px-5 py-2.5 text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20 sm:w-auto sm:px-6 sm:py-3 ${homeButtonCompact}`}
               >
                 Learn More
               </Link>

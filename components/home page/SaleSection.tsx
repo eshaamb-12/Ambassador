@@ -7,6 +7,11 @@ import { productsHref, productDetailPath, primaryCategorySlug, productUrlSegment
 import { PRODUCT_PLACEHOLDER } from '@/utils/productMedia.util';
 import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
 import type { HomeSaleContent } from '@/lib/sitePages.types';
+import {
+  homeButtonCompact,
+  homeSectionDescriptionOnDark,
+  homeSectionTitleOnDark,
+} from '@/lib/homeSectionTypography';
 
 interface SaleProduct {
   _id: string;
@@ -254,14 +259,14 @@ export default function SaleSection({ content: contentProp }: SaleSectionProps) 
       <div className="container relative mx-auto px-4">
         <div className="mb-6 flex flex-col items-center gap-4 text-center sm:mb-8 sm:gap-6 md:mb-10">
           <div className="max-w-2xl">
-            <span className="mb-3 inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#E36630]/40 bg-[#E36630]/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#ffb48a] sm:mb-4 sm:gap-2 sm:px-4 sm:py-1.5 sm:text-xs sm:tracking-[0.2em]">
+            <span className={`mb-3 inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#E36630]/40 bg-[#E36630]/15 px-3 py-1 font-bold uppercase tracking-[0.14em] text-[#ffb48a] sm:mb-4 sm:gap-2 sm:px-4 sm:py-1.5 sm:tracking-[0.2em] ${homeButtonCompact}`}>
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#E36630] opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[#E36630]" />
               </span>
               <span className="truncate">{content.badge}</span>
             </span>
-            <h2 className="text-2xl font-bold leading-tight text-white sm:text-3xl md:text-4xl lg:text-5xl">
+            <h2 className={homeSectionTitleOnDark}>
               {content.titleBefore}{' '}
               <span className="text-[#E36630]">
                 <br className="sm:hidden" />
@@ -269,14 +274,14 @@ export default function SaleSection({ content: contentProp }: SaleSectionProps) 
                 {content.titleHighlight}
               </span>
             </h2>
-            <p className="mt-2 text-xs leading-relaxed text-white/70 sm:mt-3 sm:text-sm md:text-base">
+            <p className={`mt-2 sm:mt-3 ${homeSectionDescriptionOnDark} text-white/70`}>
               {content.description}
             </p>
           </div>
 
           <Link
             href={productsHref({ features: 'on_sale' })}
-            className="inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[#E36630] px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-[#E36630]/30 transition-all hover:bg-[#cc5a2a] hover:shadow-[#E36630]/40 sm:w-auto sm:max-w-none sm:px-5 sm:text-sm"
+            className={`inline-flex w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[#E36630] px-4 py-2.5 text-white shadow-lg shadow-[#E36630]/30 transition-all hover:bg-[#cc5a2a] hover:shadow-[#E36630]/40 sm:w-auto sm:max-w-none sm:px-5 ${homeButtonCompact}`}
           >
             {content.ctaText}
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
 import type { HomeStatItem, HomeStatsContent } from '@/lib/sitePages.types';
+import {
+  homeCardBodyLight,
+  homeCardTitle,
+  homeSectionEyebrowLight,
+  homeSectionTitleBrand,
+} from '@/lib/homeSectionTypography';
 
 function useCountUp(target: number, duration: number, active: boolean) {
   const [count, setCount] = useState(0);
@@ -29,8 +35,8 @@ const StatCard = ({ stat, active }: { stat: HomeStatItem; active: boolean }) => 
         {active ? count : 0}
         {stat.suffix}
       </p>
-      <h3 className="mb-0.5 text-sm font-bold text-[#0F4C69] sm:mb-1 sm:text-base">{stat.label}</h3>
-      <p className="text-xs leading-snug text-gray-500 sm:text-sm">{stat.description}</p>
+      <h3 className={`mb-0.5 text-[#0F4C69] sm:mb-1 ${homeCardTitle}`}>{stat.label}</h3>
+      <p className={`leading-snug ${homeCardBodyLight}`}>{stat.description}</p>
     </div>
   );
 };
@@ -62,12 +68,12 @@ const StatsSection = ({ content: contentProp }: StatsSectionProps) => {
     <section ref={ref} className="bg-[#FAFAFA] py-8 sm:py-10 md:py-16">
       <div className="container mx-auto px-4">
         <div className="mb-6 text-center sm:mb-8 md:mb-10">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F4C69] sm:gap-2 sm:text-sm sm:tracking-widest">
+          <span className={`inline-flex items-center gap-1.5 sm:gap-2 ${homeSectionEyebrowLight}`}>
             <span className="h-px w-5 bg-[#0F4C69] sm:w-6" />
             {content.eyebrow}
             <span className="h-px w-5 bg-[#0F4C69] sm:w-6" />
           </span>
-          <h2 className="mt-3 text-2xl font-bold text-[#0F4C69] sm:mt-4 sm:text-3xl md:text-4xl">
+          <h2 className={`mt-3 sm:mt-4 ${homeSectionTitleBrand}`}>
             {content.heading}
           </h2>
         </div>

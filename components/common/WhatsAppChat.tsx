@@ -46,7 +46,10 @@ const WhatsAppChatWidget = () => {
   };
 
   return (
-    <div ref={widgetRef} className="fixed bottom-16 right-10 z-50 flex flex-col items-end gap-3 pointer-events-none">
+    <div
+      ref={widgetRef}
+      className="pointer-events-none fixed bottom-20 right-4 z-40 flex flex-col items-end gap-3 sm:bottom-16 sm:right-10"
+    >
 
       {/* ── Chat panel ── */}
       <div

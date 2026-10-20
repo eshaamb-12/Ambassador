@@ -4,6 +4,17 @@ import Link from 'next/link';
 import { useUser } from '@/contexts/UserContext';
 import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
 import type { HomeSignupContent } from '@/lib/sitePages.types';
+import {
+  homeButtonCta,
+  homeCardBody,
+  homeCardBodyLight,
+  homeCardTitleLight,
+  homeSectionDescriptionLight,
+  homeSectionEyebrowLight,
+  homeSectionDescriptionOnDark,
+  homeSectionTitleLight,
+  homeSectionTitleOnDark,
+} from '@/lib/homeSectionTypography';
 
 interface SignupSectionProps {
   content?: HomeSignupContent;
@@ -16,22 +27,22 @@ const SignupSection = ({ content: contentProp }: SignupSectionProps) => {
   if (user) return null;
 
   return (
-    <section className="border-t border-gray-100 bg-[#FAFAFA] py-10 md:py-16">
+    <section className="border-t border-gray-100 bg-[#FAFAFA] py-8 sm:py-10 md:py-16">
       <div className="container mx-auto px-4">
         <div className="flex flex-col overflow-hidden rounded-2xl shadow-[0_-4px_24px_0_rgba(0,0,0,0.08),0_8px_24px_0_rgba(0,0,0,0.10)] lg:flex-row">
           <div className="flex-1 bg-white p-6 sm:p-10 lg:p-14">
             <div className="max-w-lg">
-              <span className="mb-4 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-[#0F4C69]">
+              <span className={`mb-3 inline-flex items-center gap-1.5 sm:mb-4 sm:gap-2 ${homeSectionEyebrowLight}`}>
                 <span className="h-px w-6 bg-[#0F4C69]" />
                 {content.eyebrow}
               </span>
 
-              <h2 className="mb-3 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+              <h2 className={`mb-3 sm:mb-4 ${homeSectionTitleLight}`}>
                 {content.titleBefore}{' '}
                 <span className="text-[#E36630]">{content.titleHighlight}</span>
               </h2>
 
-              <p className="mb-8 text-base leading-relaxed text-gray-500">{content.description}</p>
+              <p className={`mb-6 sm:mb-8 ${homeSectionDescriptionLight}`}>{content.description}</p>
 
               <ul className="mb-10 space-y-5">
                 {content.benefits.map((benefit) => (
@@ -42,14 +53,14 @@ const SignupSection = ({ content: contentProp }: SignupSectionProps) => {
                       </svg>
                     </span>
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-800">{benefit.title}</h3>
-                      <p className="text-sm leading-snug text-gray-500">{benefit.description}</p>
+                      <h3 className={homeCardTitleLight}>{benefit.title}</h3>
+                      <p className={`leading-snug ${homeCardBodyLight}`}>{benefit.description}</p>
                     </div>
                   </li>
                 ))}
               </ul>
 
-              <div className="flex items-center gap-3 border-t border-gray-100 pt-6">
+              <div className="flex flex-col items-start gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center">
                 <div className="flex -space-x-2">
                   {['H', 'R', 'B', 'F'].map((initial) => (
                     <div
@@ -60,18 +71,20 @@ const SignupSection = ({ content: contentProp }: SignupSectionProps) => {
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-gray-500">{content.socialProof}</p>
+                <p className={`min-w-0 ${homeCardBodyLight}`}>{content.socialProof}</p>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col justify-center bg-[#E36630] p-6 sm:p-10 lg:w-[420px] lg:p-14">
-            <h3 className="mb-2 text-2xl font-bold text-white md:text-3xl">{content.panelTitle}</h3>
-            <p className="mb-8 text-sm leading-relaxed text-white/80">{content.panelDescription}</p>
+            <h3 className={`mb-2 ${homeSectionTitleOnDark}`}>{content.panelTitle}</h3>
+            <p className={`mb-6 sm:mb-8 text-white/80 ${homeSectionDescriptionOnDark}`}>
+              {content.panelDescription}
+            </p>
 
             <ul className="mb-10 space-y-3">
               {content.panelPerks.map((perk) => (
-                <li key={perk} className="flex items-center gap-3 text-sm text-white">
+                <li key={perk} className={`flex items-center gap-3 text-white ${homeCardBody}`}>
                   <svg className="h-4 w-4 flex-shrink-0 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                     <path
                       fillRule="evenodd"
@@ -87,13 +100,13 @@ const SignupSection = ({ content: contentProp }: SignupSectionProps) => {
             <div className="space-y-3">
               <Link
                 href="/signup"
-                className="block w-full rounded-xl bg-white py-4 text-center text-base font-bold text-[#E36630] shadow-md transition-colors hover:bg-gray-50"
+                className={`block w-full rounded-xl bg-white py-3.5 text-center text-[#E36630] shadow-md transition-colors hover:bg-gray-50 sm:py-4 ${homeButtonCta}`}
               >
                 {content.primaryCta}
               </Link>
               <Link
                 href="/login"
-                className="block w-full rounded-xl border-2 border-white bg-transparent py-4 text-center text-base font-semibold text-white transition-colors hover:bg-white/10"
+                className={`block w-full rounded-xl border-2 border-white bg-transparent py-3.5 text-center font-semibold text-white transition-colors hover:bg-white/10 sm:py-4 ${homeButtonCta}`}
               >
                 {content.secondaryCta}
               </Link>

@@ -66,7 +66,7 @@ const Footer = () => {
             <h3 className={headingClass}>Complaint</h3>
             <ul className="space-y-1.5 sm:space-y-2">
               {COMPLAINT_LINKS.map(({ label, href }) => (
-                <li key={href}>
+                <li key={label}>
                   <a href={href} className={linkClass}>
                     {label}
                   </a>

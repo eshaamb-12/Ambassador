@@ -33,7 +33,8 @@ const CategoryCard = ({ title, image, category, categorySlug, children }: Catego
             children
           )}
         </div>
-        <div className="flex flex-1 flex-col justify-center p-3 sm:p-4">          <h3 className="mb-1.5 line-clamp-2 text-center text-lg font-semibold leading-snug text-[#0F4C69] sm:mb-2 sm:text-xl md:text-2xl md:leading-tight lg:text-[28px] lg:leading-[40px]">
+        <div className="flex flex-1 flex-col justify-center p-3 sm:p-4">
+          <h3 className="mb-1.5 line-clamp-2 text-center text-base font-semibold leading-snug text-[#0F4C69] sm:mb-2 sm:text-lg md:text-xl">
             {title}
           </h3>
           <div className="flex justify-center">

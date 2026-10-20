@@ -3,6 +3,11 @@
 import Image from 'next/image';
 import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
 import type { HomeClientLogosContent } from '@/lib/sitePages.types';
+import {
+  homeSectionDescriptionLight,
+  homeSectionEyebrowLight,
+  homeSectionTitleLight,
+} from '@/lib/homeSectionTypography';
 
 /**
  * Client logo slider — edit this list to swap images or reorder.
@@ -184,15 +189,15 @@ const ClientLogosSlider = ({ intro: introProp }: ClientLogosSliderProps) => {
       <section className="border-t border-gray-200 bg-[#E3E6E6] py-8 sm:py-10 md:py-16">
         <div className="container mx-auto px-4">
           <div className="mb-8 text-center sm:mb-10 md:mb-12">
-            <span className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F4C69] sm:mb-4 sm:gap-2 sm:text-sm sm:tracking-widest">
+            <span className={`mb-3 inline-flex items-center gap-1.5 sm:mb-4 sm:gap-2 ${homeSectionEyebrowLight}`}>
               <span className="h-px w-6 bg-[#0F4C69] sm:w-8" />
               {intro.eyebrow}
               <span className="h-px w-6 bg-[#0F4C69] sm:w-8" />
             </span>
-            <h2 className="mb-3 text-2xl font-bold leading-tight text-gray-900 sm:mb-4 sm:text-3xl md:text-4xl">
+            <h2 className={`mb-3 sm:mb-4 ${homeSectionTitleLight}`}>
               {intro.title} <span className="text-[#E36630]">{intro.titleHighlight}</span>
             </h2>
-            <p className="mx-auto max-w-2xl px-1 text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg">
+            <p className={`mx-auto max-w-2xl px-1 ${homeSectionDescriptionLight}`}>
               {intro.description}
             </p>
             <div className="mx-auto mt-4 h-1 w-12 rounded-full bg-[#E36630] sm:mt-5 sm:w-16" />

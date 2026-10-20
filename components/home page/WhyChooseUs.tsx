@@ -3,6 +3,13 @@
 import type { ReactNode } from 'react';
 import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
 import type { HomeWhyChooseUsContent } from '@/lib/sitePages.types';
+import {
+  homeCardBodyLight,
+  homeCardTitleLight,
+  homeSectionDescriptionLight,
+  homeSectionEyebrowLight,
+  homeSectionTitleLight,
+} from '@/lib/homeSectionTypography';
 
 type ReasonIcon = {
   iconAlt: string;
@@ -68,15 +75,15 @@ const WhyChooseUs = ({ content: contentProp }: WhyChooseUsProps) => {
     <section className="border-t border-gray-200 bg-[#E3E6E6] py-8 sm:py-10 md:py-16">
       <div className="container mx-auto px-4">
         <div className="mb-8 text-center sm:mb-10 md:mb-12">
-          <span className="mb-3 inline-flex flex-wrap items-center justify-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F4C69] sm:mb-4 sm:gap-2 sm:text-sm sm:tracking-widest">
+          <span className={`mb-3 inline-flex flex-wrap items-center justify-center gap-1.5 sm:mb-4 sm:gap-2 ${homeSectionEyebrowLight}`}>
             <span className="h-px w-5 bg-[#0F4C69] sm:w-6" />
             {content.eyebrowBefore} <span className="text-[#E36630]">{content.eyebrowHighlight}</span>
             <span className="h-px w-5 bg-[#0F4C69] sm:w-6" />
           </span>
-          <h2 className="mb-3 px-1 text-2xl font-bold leading-tight text-gray-900 sm:mb-4 sm:text-3xl md:text-4xl">
+          <h2 className={`mb-3 px-1 sm:mb-4 ${homeSectionTitleLight}`}>
             {content.title}
           </h2>
-          <p className="mx-auto max-w-2xl px-1 text-sm leading-relaxed text-gray-500 sm:text-base md:text-lg">
+          <p className={`mx-auto max-w-2xl px-1 ${homeSectionDescriptionLight}`}>
             {content.description}
           </p>
         </div>
@@ -96,10 +103,10 @@ const WhyChooseUs = ({ content: contentProp }: WhyChooseUsProps) => {
               >
                 {reason.icon}
               </div>
-              <h3 className="mb-1.5 text-sm font-bold text-gray-800 transition-colors duration-300 group-hover:text-[#E36630] sm:mb-2 sm:text-base">
+              <h3 className={`mb-1.5 transition-colors duration-300 group-hover:text-[#E36630] sm:mb-2 ${homeCardTitleLight}`}>
                 {reason.title}
               </h3>
-              <p className="text-xs leading-relaxed text-gray-500 sm:text-sm">{reason.description}</p>
+              <p className={homeCardBodyLight}>{reason.description}</p>
             </div>
           ))}
         </div>

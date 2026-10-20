@@ -15,8 +15,10 @@ if (!env.NEXT_DIST_DIR) {
   delete env.NEXT_DIST_DIR;
 }
 
-// Webpack dev avoids Turbopack route-table bugs (e.g. /login, /signup → 404 on Windows).
+// Webpack dev avoids Turbopack route-table bugs (e.g. /products, /api/* → 404 on Windows).
 const devArgs = ['dev', '--webpack', ...process.argv.slice(2).filter((a) => a !== '--turbo' && a !== '--turbopack')];
+
+console.log('[dev] Using webpack (required on Windows). If routes 404, stop the server and run: npm run clean:cache && npm run dev');
 
 const result = spawnSync(process.execPath, [nextBin, ...devArgs], {
   stdio: 'inherit',

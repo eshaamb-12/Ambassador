@@ -3,6 +3,7 @@ import {
   MAIN_CATALOG_FILTER,
   USED_EQUIPMENT_FILTER,
 } from '@/backend/lib/productTypeFilters';
+import { PRODUCT_BRAND_KEYS } from '@/backend/lib/productMarketingFields';
 
 export function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -76,6 +77,7 @@ export function buildAdminProductListFilter(options: {
   stock?: string;
   categoryId?: string;
   categoryIdsParam?: string;
+  brand?: string;
   /** When true, category filters are ignored (text search spans all categories). */
   ignoreCategory?: boolean;
 }): Record<string, unknown> {
@@ -109,6 +111,11 @@ export function buildAdminProductListFilter(options: {
 
   if (options.stock === 'in_stock') clauses.push({ stock: { $gt: 0 } });
   if (options.stock === 'out_of_stock') clauses.push({ stock: { $lte: 0 } });
+
+  const brand = (options.brand ?? 'all').trim().toLowerCase();
+  if (brand !== 'all' && (PRODUCT_BRAND_KEYS as readonly string[]).includes(brand)) {
+    clauses.push({ brands: brand });
+  }
 
   if (clauses.length === 0) return {};
   if (clauses.length === 1) return clauses[0];

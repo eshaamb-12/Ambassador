@@ -154,6 +154,38 @@ const SORT_MAP: Record<string, string> = {
   newest:       'newest',
 };
 
+const API_SORT_TO_UI: Record<string, string> = {
+  random: 'random',
+  name_asc: 'name',
+  price_asc: 'price-low',
+  price_desc: 'price-high',
+  newest: 'newest',
+};
+
+function filtersFromSearchParams(sp: URLSearchParams) {
+  const f = (sp.get('features') || '').split(',').filter(Boolean);
+  const b = (sp.get('brands') || '').split(',').filter(Boolean);
+  const sortRaw = sp.get('sort');
+  return {
+    features: {
+      freeShipping: f.includes('free_shipping'),
+      onSale: f.includes('on_sale'),
+      newArrival: f.includes('new_arrival'),
+      bestSeller: f.includes('best_seller'),
+      customization: f.includes('customization'),
+    } satisfies Record<ProductFeatureFilterKey, boolean>,
+    brands: {
+      ambassador: b.includes('ambassador'),
+      imported: b.includes('imported'),
+    } satisfies Record<BrandFilterKey, boolean>,
+    priceRange: {
+      min: Math.max(0, parseInt(sp.get('minPrice') || '0', 10) || 0),
+      max: Math.max(0, parseInt(sp.get('maxPrice') || '0', 10) || 0),
+    },
+    sortBy: (sortRaw && API_SORT_TO_UI[sortRaw]) || 'random',
+  };
+}
+
 const PAGE_SIZE = 12;
 
  function ProductResultRow({
@@ -488,30 +520,19 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
   );
   const [searchTerm,  setSearchTerm]  = useState(() => searchParams.get('search')  || '');
   const [shuffleSeed] = useState(() => Date.now());
-  const [sortBy,      setSortBy]      = useState(() => searchParams.get('sort')    || 'random');
+  const [sortBy,      setSortBy]      = useState(() => filtersFromSearchParams(searchParams).sortBy);
   const [currentPage, setCurrentPage] = useState(() => Math.max(1, parseInt(searchParams.get('page') || '1', 10)));
-  const [priceRange,  setPriceRange]  = useState(() => ({
-    min: parseInt(searchParams.get('minPrice') || '0', 10),
-    max: parseInt(searchParams.get('maxPrice') || '0', 10),
+  const [priceRange,  setPriceRange]  = useState(() => filtersFromSearchParams(searchParams).priceRange);
+  const [features, setFeatures] = useState<Record<ProductFeatureFilterKey, boolean>>(
+    () => filtersFromSearchParams(searchParams).features,
+  );
+  const [brands, setBrands] = useState<Record<BrandFilterKey, boolean>>(
+    () => filtersFromSearchParams(searchParams).brands,
+  );
+  const [availability, setAvailability] = useState(() => ({
+    readyToShip: false,
+    customOrder: false,
   }));
-  const [features, setFeatures] = useState<Record<ProductFeatureFilterKey, boolean>>(() => {
-    const f = (searchParams.get('features') || '').split(',').filter(Boolean);
-    return {
-      freeShipping: f.includes('free_shipping'),
-      onSale:       f.includes('on_sale'),
-      newArrival:   f.includes('new_arrival'),
-      bestSeller:   f.includes('best_seller'),
-      customization: f.includes('customization'),
-    };
-  });
-  const [brands, setBrands] = useState<Record<BrandFilterKey, boolean>>(() => {
-    const b = (searchParams.get('brands') || '').split(',').filter(Boolean);
-    return { ambassador: b.includes('ambassador'), imported: b.includes('imported') };
-  });
-  const [availability, setAvailability] = useState(() => {
-    const b = (searchParams.get('brands') || '').split(',').filter(Boolean);
-    return { readyToShip: b.includes('imported'), customOrder: b.includes('ambassador') };
-  });
 
   const [showCartPopup, setShowCartPopup] = useState(false);
   const [addedProduct,  setAddedProduct]  = useState<Product | null>(null);

@@ -34,7 +34,7 @@ const ADMIN_LIST_PROJECTION = {
   categories: 1, images: { $slice: 1 }, createdAt: 1,
 };
 
-/** GET /api/admin/products?page=1&limit=10&search=...&status=...&category=...&categories=id1,id2&stock=... */
+/** GET /api/admin/products?page=1&limit=10&search=...&status=...&category=...&categories=id1,id2&stock=...&brand=... */
 export async function GET(req: NextRequest) {
   const authError = await requireAdmin(req);
   if (authError) return authError;
@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
     const stock      = searchParams.get('stock')    ?? 'all';
     const categoryId = searchParams.get('category') ?? '';
     const categoryIdsParam = searchParams.get('categories') ?? '';
+    const brand = searchParams.get('brand') ?? 'all';
     const productType = searchParams.get('productType') ?? 'all';
     const page       = Math.max(1, parseInt(searchParams.get('page')  ?? '1', 10));
     const limit      = Math.min(50, parseInt(searchParams.get('limit') ?? String(ADMIN_PAGE_LIMIT), 10));
@@ -63,6 +64,7 @@ export async function GET(req: NextRequest) {
       stock,
       categoryId,
       categoryIdsParam,
+      brand,
       ignoreCategory: searchActive,
     });
 
@@ -72,6 +74,7 @@ export async function GET(req: NextRequest) {
       stock,
       categoryId,
       categoryIdsParam,
+      brand,
       ignoreCategory: searchActive,
     });
 

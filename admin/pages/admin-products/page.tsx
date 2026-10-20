@@ -41,6 +41,21 @@ interface Category { _id: string; title: string; }
 
 const getTitle = (v: any): string => (v && typeof v === 'object' && v.title) ? v.title : String(v || '—');
 
+const ADMIN_BRAND_FILTERS = [
+  { value: 'ambassador', label: 'Ambassador' },
+  { value: 'imported', label: 'Imported' },
+] as const;
+
+const formatAdminBrandLabels = (slugs: string[] | undefined): string => {
+  if (!slugs?.length) return '—';
+  const ordered = ADMIN_BRAND_FILTERS.map(({ value, label }) =>
+    slugs.includes(value) ? label : null,
+  ).filter((x) => x != null);
+  const unknown = slugs.filter((s) => !ADMIN_BRAND_FILTERS.some((b) => b.value === s));
+  const labels = [...ordered, ...unknown.map((s) => s.charAt(0).toUpperCase() + s.slice(1))];
+  return labels.length ? labels.join(' · ') : '—';
+};
+
 const taxonomyList = (p: Product) => {
   const arr = p.categories;
   if (Array.isArray(arr) && arr.length) return arr;
@@ -128,6 +143,7 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
   const [filterCat,    setFilterCat]   = useState('all');
   const [filterStatus, setFilterStatus]= useState('all');
   const [filterStock,  setFilterStock] = useState('all');
+  const [filterBrand,  setFilterBrand] = useState('all');
   const [successMsg,   setSuccessMsg]  = useState('');
   const [error,        setError]       = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -160,6 +176,7 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
       if (activeSearch) params.set('search', activeSearch);
       if (filterStatus !== 'all') params.set('status', filterStatus);
       if (filterStock  !== 'all') params.set('stock', filterStock);
+      if (filterBrand  !== 'all') params.set('brand', filterBrand);
       // While searching, look across all categories (category filter still shown in UI).
       if (filterCat !== 'all' && activeSearch.length < 2) params.set('category', filterCat);
 
@@ -175,7 +192,7 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, filterCat, filterStatus, filterStock, catalogUi.productType]);
+  }, [searchTerm, filterCat, filterStatus, filterStock, filterBrand, catalogUi.productType]);
 
   useEffect(() => {
     const timer = setTimeout(() => setSearchTerm(searchInput.trim()), 300);
@@ -191,7 +208,7 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
   }, []);
 
   // Re-fetch when page or filters change; reset to page 1 on filter change
-  useEffect(() => { setCurrentPage(1); }, [searchTerm, filterCat, filterStatus, filterStock]);
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, filterCat, filterStatus, filterStock, filterBrand]);
   useEffect(() => { fetchProducts(currentPage); }, [currentPage, fetchProducts]);
 
   // ── CRUD handlers ──────────────────────────────────────────────────────────
@@ -426,6 +443,13 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
               <option value="in_stock">In Stock</option>
               <option value="out_of_stock">Out of Stock</option>
             </select>
+            <select value={filterBrand} onChange={e => setFilterBrand(e.target.value)}
+              className="w-full md:w-44 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 outline-none focus:ring-2 focus:ring-[#0F4C69]/30">
+              <option value="all">All Brands</option>
+              {ADMIN_BRAND_FILTERS.map((b) => (
+                <option key={b.value} value={b.value}>{b.label}</option>
+              ))}
+            </select>
           </div>
           {searchTerm.trim().length >= 2 && filterCat !== 'all' && (
             <p className="text-xs text-[#0F4C69]">
@@ -576,6 +600,7 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
                     <th className="px-6 py-3 text-left">Product ID</th>
                     <th className="px-6 py-3 text-left">Product</th>
                     <th className="px-6 py-3 text-left">Categories</th>
+                    <th className="px-6 py-3 text-left">Brand</th>
                     <th className="px-6 py-3 text-left">Price</th>
                     <th className="px-6 py-3 text-left">Stock</th>
                     <th className="px-6 py-3 text-left">Rating</th>
@@ -642,6 +667,17 @@ const AdminProductsPage = ({ catalog = 'main' }: { catalog?: AdminProductCatalog
                             </span>
                           ))}
                         </div>
+                      </td>
+
+                      {/* Brand */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {product.brands?.length ? (
+                          <span className="inline-flex px-2 py-0.5 text-xs font-medium bg-[#E36630]/10 text-[#E36630] rounded-full">
+                            {formatAdminBrandLabels(product.brands)}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
                       </td>
 
                       {/* Price */}

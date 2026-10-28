@@ -68,9 +68,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       }
       doc.profession = profession;
     }
-    if (body.description !== undefined) {
-      doc.description = String(body.description).trim();
-    }
     if (body.videoUrl !== undefined) {
       const videoUrl = String(body.videoUrl).trim();
       if (!videoUrl) {

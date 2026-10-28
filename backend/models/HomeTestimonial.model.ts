@@ -3,7 +3,6 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 export interface IHomeTestimonial extends Document {
   name: string;
   profession: string;
-  description: string;
   videoUrl: string;
   status: 'active' | 'inactive';
   sortOrder: number;
@@ -24,12 +23,6 @@ const homeTestimonialSchema = new Schema<IHomeTestimonial>(
       required: [true, 'Profession is required'],
       trim: true,
       maxlength: [200, 'Profession cannot exceed 200 characters'],
-    },
-    description: {
-      type: String,
-      trim: true,
-      maxlength: [5000, 'Description cannot exceed 5000 characters'],
-      default: '',
     },
     videoUrl: {
       type: String,

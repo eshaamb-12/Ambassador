@@ -8,14 +8,13 @@ export async function GET() {
     await connectDB();
     const items = await HomeTestimonial.find({ status: 'active' })
       .sort({ sortOrder: 1, createdAt: -1 })
-      .select('name profession description videoUrl sortOrder')
+      .select('name profession videoUrl sortOrder')
       .lean();
 
     const data = items.map((d) => ({
       _id: String(d._id),
       name: d.name,
       profession: d.profession,
-      description: d.description ?? '',
       videoUrl: d.videoUrl ?? '',
     }));
 

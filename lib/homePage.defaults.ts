@@ -273,29 +273,21 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
       {
         name: 'Ahmed R.',
         profession: 'Restaurant Owner — Lahore',
-        description:
-          'Ambassador supplied our full line-up — fryers, ranges, and fabrication — on time and to spec. Their after-sales team still checks in months later.',
         videoUrl: '',
       },
       {
         name: 'Sana K.',
         profession: 'Bakery Manager — Karachi',
-        description:
-          'We have partnered with Ambassador for years for ovens and prep equipment. Consistent quality, fair pricing, and honest advice on what we actually need.',
         videoUrl: '',
       },
       {
         name: 'Chef Imran H.',
         profession: 'Executive Chef — Islamabad',
-        description:
-          'The stainless build and performance match what we expect from international brands. Installation was clean and the kitchen was operational ahead of opening day.',
         videoUrl: '',
       },
       {
         name: 'Fatima Z.',
         profession: 'Catering Director — Faisalabad',
-        description:
-          'Bulk orders, custom sizes, and nationwide delivery made scaling our catering kitchens straightforward. Ambassador feels like an extension of our ops team.',
         videoUrl: '',
       },
     ],

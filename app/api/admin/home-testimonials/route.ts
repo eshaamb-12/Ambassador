@@ -47,7 +47,6 @@ export async function POST(req: NextRequest) {
 
     const name = typeof body.name === 'string' ? body.name.trim() : '';
     const profession = typeof body.profession === 'string' ? body.profession.trim() : '';
-    const description = typeof body.description === 'string' ? body.description.trim() : '';
     const videoUrl = typeof body.videoUrl === 'string' ? body.videoUrl.trim() : '';
     const status = body.status === 'inactive' ? 'inactive' : ('active' as const);
     const sortOrder = typeof body.sortOrder === 'number' ? body.sortOrder : Number(body.sortOrder) || 0;
@@ -68,7 +67,6 @@ export async function POST(req: NextRequest) {
     const doc = await HomeTestimonial.create({
       name,
       profession,
-      description,
       videoUrl,
       status,
       sortOrder,

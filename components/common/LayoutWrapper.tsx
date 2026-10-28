@@ -11,28 +11,33 @@ interface LayoutWrapperProps {
   children: React.ReactNode;
 }
 
+const DASHBOARD_PATH_PREFIXES = [
+  '/admin',
+  '/product-management',
+  '/used-equipment-management',
+  '/category-management',
+  '/users',
+  '/orders-management',
+  '/gallery-management',
+  '/reviews-management',
+  '/admin-settings',
+  '/seo-tracking',
+  '/payments-management',
+  '/spare-parts-management',
+  '/careers-management',
+  '/blog-management',
+  '/pages-management',
+  '/home-testimonials-management',
+] as const;
+
+function matchesPathPrefix(pathname: string | null, prefixes: readonly string[]) {
+  return prefixes.some((prefix) => pathname?.startsWith(prefix));
+}
+
 const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   const pathname = usePathname();
-  
-  // Admin routes use their own layout (no public header/footer)
-  const isAdminRoute =
-    pathname?.startsWith('/admin') ||
-    pathname?.startsWith('/product-management') ||
-    pathname?.startsWith('/used-equipment-management') ||
-    pathname?.startsWith('/category-management') ||
-    pathname?.startsWith('/users') ||
-    pathname?.startsWith('/orders-management') ||
-    pathname?.startsWith('/gallery-management') ||
-    pathname?.startsWith('/reviews-management') ||
-    pathname?.startsWith('/admin-settings') ||
-    pathname?.startsWith('/seo-tracking') ||
-    pathname?.startsWith('/payments-management') ||
-    pathname?.startsWith('/spare-parts-management') ||
-    pathname?.startsWith('/careers-management') ||
-    pathname?.startsWith('/blog-management') ||
-    pathname?.startsWith('/pages-management');
-  // Don't render main navigation for admin routes
-  if (isAdminRoute) {
+
+  if (matchesPathPrefix(pathname, DASHBOARD_PATH_PREFIXES)) {
     return <>{children}</>;
   }
   

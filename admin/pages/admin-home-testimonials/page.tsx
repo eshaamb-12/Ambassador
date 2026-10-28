@@ -12,7 +12,6 @@ interface Row {
   id: string;
   name: string;
   profession: string;
-  description: string;
   videoUrl: string;
   status: 'active' | 'inactive';
   sortOrder: number;
@@ -22,7 +21,6 @@ interface Doc {
   _id: string;
   name: string;
   profession: string;
-  description?: string;
   videoUrl?: string;
   status?: string;
   sortOrder?: number;
@@ -33,7 +31,6 @@ function mapDoc(doc: Doc): Row {
     id: String(doc._id),
     name: doc.name,
     profession: doc.profession,
-    description: doc.description ?? '',
     videoUrl: doc.videoUrl ?? '',
     status: doc.status === 'inactive' ? 'inactive' : 'active',
     sortOrder: typeof doc.sortOrder === 'number' ? doc.sortOrder : 0,
@@ -46,7 +43,6 @@ const modalInputClass =
 const emptyForm: Omit<Row, 'id'> = {
   name: '',
   profession: '',
-  description: '',
   videoUrl: '',
   status: 'active',
   sortOrder: 0,
@@ -117,7 +113,6 @@ export default function AdminHomeTestimonialsPage() {
     setForm({
       name: row.name,
       profession: row.profession,
-      description: row.description,
       videoUrl: row.videoUrl,
       status: row.status,
       sortOrder: row.sortOrder,
@@ -149,7 +144,6 @@ export default function AdminHomeTestimonialsPage() {
         body: JSON.stringify({
           name,
           profession,
-          description: form.description.trim(),
           videoUrl,
           sortOrder: form.sortOrder,
           ...(canChangeStatus ? { status: form.status } : { status: 'active' }),
@@ -195,7 +189,6 @@ export default function AdminHomeTestimonialsPage() {
         body: JSON.stringify({
           name,
           profession,
-          description: form.description.trim(),
           videoUrl,
           sortOrder: form.sortOrder,
           ...(canChangeStatus ? { status: form.status } : {}),
@@ -318,15 +311,6 @@ export default function AdminHomeTestimonialsPage() {
         videoUrl={form.videoUrl}
         onChangeUrl={(videoUrl) => setForm((f) => ({ ...f, videoUrl }))}
       />
-      <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600">Description (optional, not on card)</label>
-        <textarea
-          className={modalInputClass}
-          rows={3}
-          value={form.description}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-        />
-      </div>
       {canChangeStatus ? (
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-600">Status</label>
@@ -622,12 +606,6 @@ export default function AdminHomeTestimonialsPage() {
                   <dt className="font-medium text-gray-500">Status</dt>
                   <dd className="text-gray-900">{selected.status}</dd>
                 </div>
-                {selected.description ? (
-                  <div>
-                    <dt className="font-medium text-gray-500">Description</dt>
-                    <dd className="whitespace-pre-wrap text-gray-900">{selected.description}</dd>
-                  </div>
-                ) : null}
               </dl>
               {renderVideoPreview(selected.videoUrl)}
               <div className="mt-6 flex justify-end">

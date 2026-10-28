@@ -102,7 +102,6 @@ export interface HomeWhyChooseUsContent {
 export interface HomeTestimonialItem {
   name: string;
   profession: string;
-  description: string;
   /** Optional legacy poster; storefront cards use videoUrl for media. */
   image?: string;
   imageAlt?: string;

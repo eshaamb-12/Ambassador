@@ -44,10 +44,9 @@ export default function HomeTestimonialsSection({ content: contentProp }: HomeTe
         const json = await res.json();
         if (cancelled || !json.success || !Array.isArray(json.data)) return;
         const mapped: HomeTestimonialItem[] = json.data.map(
-          (d: { name: string; profession: string; description?: string; videoUrl?: string }) => ({
+          (d: { name: string; profession: string; videoUrl?: string }) => ({
             name: d.name,
             profession: d.profession,
-            description: d.description ?? '',
             videoUrl: d.videoUrl ?? '',
           }),
         );

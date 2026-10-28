@@ -426,7 +426,6 @@ function normalizeTestimonialItem(raw: unknown, fallback: HomeTestimonialItem): 
   return {
     name: str(c.name, fallback.name),
     profession: str(c.profession, fallback.profession),
-    description: str(c.description, fallback.description),
     image: normalizeTestimonialImage(c.image, fallback.image ?? ''),
     imageAlt: str(c.imageAlt, fallback.imageAlt ?? fallback.name),
     videoUrl: str(c.videoUrl, fallback.videoUrl ?? ''),

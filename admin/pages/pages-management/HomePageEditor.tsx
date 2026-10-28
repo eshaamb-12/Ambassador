@@ -123,9 +123,9 @@ export default function HomePageEditor({ initialConfig }: HomePageEditorProps) {
       )}
 
       <div className="rounded-lg border border-[#0F4C69]/20 bg-[#0F4C69]/5 px-4 py-3 text-sm text-gray-700">
-        Edit each section on the right, then click <strong>Save home page</strong>. Hero slides: upload banner
-        images from your device (no URL needed). Use <strong>Show</strong> and <strong>Up/Down</strong> to hide or
-        reorder blocks.
+        Edit each section on the right, then click <strong>Save home page</strong>. Hero slides and{' '}
+        <strong>Testimonials</strong>: upload videos from your device (or paste a YouTube link). Use{' '}
+        <strong>Show</strong> and <strong>Up/Down</strong> to hide or reorder blocks.
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row">

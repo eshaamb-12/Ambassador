@@ -1,20 +1,100 @@
 import { PRODUCTS_PATH } from '@/lib/siteRoutes';
 import type { HomePageConfig, HomeSectionId } from '@/lib/sitePages.types';
 
+/** Set to true when the home client-logo marquee should show again. */
+export const CLIENT_LOGOS_SLIDER_VISIBLE = false;
+
+/** Set to true to show the home “Our Track Record” stats section. */
+export const HOME_STATS_SECTION_VISIBLE = false;
+
+/** Set to true to show the home “Why choose us” section. */
+export const HOME_WHY_CHOOSE_US_SECTION_VISIBLE = false;
+
+/** Home sale section — brand colors (#0F4C69 blue, #EBF0F4 gray, #E36630 accent). */
+export const HOME_SALE_THEME = {
+  sectionBg: '#EBF0F4',
+  sectionBorder: '#EBF0F4',
+  badgeBg: '#0F4C69',
+  badgeText: '#FFFFFF',
+  title: '#0F4C69',
+  titleHighlight: '#E36630',
+  description: '#5c6b7a',
+  ctaBg: '#E36630',
+  ctaHover: '#cc5a2a',
+  cardBorder: '#EBF0F4',
+  cardImageBg: '#FFFFFF',
+  category: '#888888',
+  productTitle: '#333333',
+  price: '#E36630',
+  priceWas: '#BBBBBB',
+  shopButton: '#0F4C69',
+  shopButtonHover: '#0d3d55',
+  navButton: '#0F4C69',
+  fadeEdge: '#EBF0F4',
+  cardShadow: '0 10px 26px 0 rgba(173, 185, 197, 0.72), 0 4px 14px 0 rgba(173, 185, 197, 0.55)',
+  cardShadowHover: '0 18px 38px 0 rgba(173, 185, 197, 0.85), 0 8px 20px 0 rgba(173, 185, 197, 0.65)',
+} as const;
+
+/** Home custom kitchen section — white band (#0F4C69, #E36630). */
+export const HOME_CUSTOM_KITCHEN_THEME = {
+  sectionBg: '#FFFFFF',
+  sectionBorder: '#EBF0F4',
+  imageBadgeBg: '#EBF0F4',
+  imageBadgeBorder: '#0F4C69',
+  imageBadgeText: '#0F4C69',
+  eyebrow: '#0F4C69',
+  eyebrowLine: '#E36630',
+  title: '#0F4C69',
+  titleHighlight: '#E36630',
+  description: '#5c6b7a',
+  highlightBorder: '#CBD5E1',
+  highlightTitle: '#0F4C69',
+  highlightText: '#64748b',
+  primaryCtaBg: '#E36630',
+  primaryCtaHover: '#cc5a2a',
+  secondaryBorder: '#0F4C69',
+  secondaryText: '#0F4C69',
+  secondaryBg: '#FFFFFF',
+  secondaryHoverBg: '#EBF0F4',
+  footerMuted: '#64748b',
+  footerLink: '#E36630',
+  footerLinkHover: '#cc5a2a',
+  imageRing: '#EBF0F4',
+} as const;
+
+/** Home testimonials carousel — white section, brand accent. */
+export const HOME_TESTIMONIALS_THEME = {
+  sectionBg: '#FFFFFF',
+  title: '#0F4C69',
+  titleHighlight: '#E36630',
+  subtitle: '#64748b',
+  cardBorder: '#E2E8F0',
+  /** Soft spread; kept moderate so shadows fade naturally (not clipped by scroll areas). */
+  cardShadow: '0 12px 28px -8px rgba(15, 76, 105, 0.18), 0 6px 16px -6px rgba(15, 76, 105, 0.12)',
+  cardShadowHover: '0 20px 40px -10px rgba(15, 76, 105, 0.22), 0 10px 22px -8px rgba(15, 76, 105, 0.14)',
+  navButtonBg: '#F8FAFC',
+  navButtonBorder: '#E2E8F0',
+  navButtonIcon: '#0F4C69',
+} as const;
+
 const SECTION_ORDER: HomeSectionId[] = [
   'hero',
-  'sale',
   'clientLogos',
+  'sale',
   'customKitchen',
   'categories',
   'stats',
   'whyChooseUs',
+  'testimonials',
   'signup',
   'cta',
 ];
 
 export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
-  sections: SECTION_ORDER.map((id) => ({ id, enabled: true })),
+  sections: SECTION_ORDER.map((id) => ({
+    id,
+    enabled: id !== 'stats',
+  })),
   hero: {
     slides: [
       {
@@ -180,6 +260,42 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
         title: '1-Year Warranty',
         description:
           'Every product carries a full 1-year warranty backed by our engineering and fabrication team on-site.',
+      },
+    ],
+  },
+  testimonials: {
+    titleBefore: 'Real Stories from',
+    titleHighlight: 'Real Kitchens',
+    subtitle: 'Hear from chefs, owners, and operators who equip with Ambassador across Pakistan.',
+    showMoreLabel: 'Show More',
+    items: [
+      {
+        name: 'Ahmed R.',
+        profession: 'Restaurant Owner — Lahore',
+        description:
+          'Ambassador supplied our full line-up — fryers, ranges, and fabrication — on time and to spec. Their after-sales team still checks in months later.',
+        videoUrl: '',
+      },
+      {
+        name: 'Sana K.',
+        profession: 'Bakery Manager — Karachi',
+        description:
+          'We have partnered with Ambassador for years for ovens and prep equipment. Consistent quality, fair pricing, and honest advice on what we actually need.',
+        videoUrl: '',
+      },
+      {
+        name: 'Chef Imran H.',
+        profession: 'Executive Chef — Islamabad',
+        description:
+          'The stainless build and performance match what we expect from international brands. Installation was clean and the kitchen was operational ahead of opening day.',
+        videoUrl: '',
+      },
+      {
+        name: 'Fatima Z.',
+        profession: 'Catering Director — Faisalabad',
+        description:
+          'Bulk orders, custom sizes, and nationwide delivery made scaling our catering kitchens straightforward. Ambassador feels like an extension of our ops team.',
+        videoUrl: '',
       },
     ],
   },

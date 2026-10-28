@@ -315,7 +315,7 @@ const Header = () => {
   );
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-md">
+    <header className="sticky top-0 z-50 bg-white">
       <div className="container mx-auto px-3 sm:px-4 lg:px-4">
         <div className="flex flex-col gap-2 py-2 lg:min-h-16 lg:flex-row lg:flex-nowrap lg:items-center lg:justify-between lg:gap-4 lg:py-2">
           {/* Logo + actions — stacked on mobile/tablet; lg:contents restores original desktop row */}

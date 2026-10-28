@@ -3,7 +3,6 @@
 import { memo } from 'react';
 import type { HomePageConfig, HomeSectionId } from '@/lib/sitePages.types';
 import { HOME_SECTION_LABELS } from '@/lib/sitePages.types';
-
 export const Field = memo(function Field({
   label,
   value,
@@ -424,6 +423,53 @@ export function SectionContentEditor({
               />
             </div>
           ))}
+        </div>
+      );
+    case 'testimonials':
+      return (
+        <div className="mt-4 space-y-3">
+          <Field
+            label="Title (before highlight)"
+            value={config.testimonials.titleBefore}
+            onChange={(titleBefore) =>
+              patchConfig((c) => ({ ...c, testimonials: { ...c.testimonials, titleBefore } }))
+            }
+          />
+          <Field
+            label="Title highlight"
+            value={config.testimonials.titleHighlight}
+            onChange={(titleHighlight) =>
+              patchConfig((c) => ({ ...c, testimonials: { ...c.testimonials, titleHighlight } }))
+            }
+          />
+          <Field
+            label="Subtitle"
+            value={config.testimonials.subtitle}
+            onChange={(subtitle) =>
+              patchConfig((c) => ({ ...c, testimonials: { ...c.testimonials, subtitle } }))
+            }
+            multiline
+          />
+          <Field
+            label="“Show more” link text"
+            value={config.testimonials.showMoreLabel}
+            onChange={(showMoreLabel) =>
+              patchConfig((c) => ({ ...c, testimonials: { ...c.testimonials, showMoreLabel } }))
+            }
+          />
+          <div className="rounded-lg border border-[#0F4C69]/20 bg-[#EBF0F4]/60 p-4 text-sm text-gray-700">
+            <p className="font-medium text-[#0F4C69]">Testimonial video cards</p>
+            <p className="mt-1 text-xs text-gray-600">
+              Cards are managed in a separate table with Create / Save / Delete — not on this screen. After you upload a
+              video there, it appears on the home page automatically.
+            </p>
+            <a
+              href="/home-testimonials-management"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700"
+            >
+              Open Home Testimonials management →
+            </a>
+          </div>
         </div>
       );
     case 'signup':

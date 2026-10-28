@@ -34,6 +34,10 @@ import type {
 
   HomeWhyReason,
 
+  HomeTestimonialItem,
+
+  HomeTestimonialsContent,
+
 } from '@/lib/sitePages.types';
 
 import { HOME_SECTION_LABELS } from '@/lib/sitePages.types';
@@ -104,9 +108,15 @@ function normalizeSections(raw: unknown): HomeSectionConfig[] {
 
   }
 
+  const orderIds = defaults.map((s) => s.id);
 
+  const sorted = (ordered.length ? ordered : defaults).sort(
 
-  return ordered.length ? ordered : defaults;
+    (a, b) => orderIds.indexOf(a.id) - orderIds.indexOf(b.id),
+
+  );
+
+  return sorted;
 
 }
 
@@ -404,6 +414,39 @@ function normalizeWhyReason(raw: unknown, fallback: HomeWhyReason): HomeWhyReaso
 
 
 
+function normalizeTestimonialImage(raw: string | undefined, fallback: string): string {
+  const image = str(raw, fallback);
+  if (image.includes('/person-')) return fallback;
+  return image;
+}
+
+function normalizeTestimonialItem(raw: unknown, fallback: HomeTestimonialItem): HomeTestimonialItem {
+  if (!raw || typeof raw !== 'object') return fallback;
+  const c = raw as HomeTestimonialItem;
+  return {
+    name: str(c.name, fallback.name),
+    profession: str(c.profession, fallback.profession),
+    description: str(c.description, fallback.description),
+    image: normalizeTestimonialImage(c.image, fallback.image ?? ''),
+    imageAlt: str(c.imageAlt, fallback.imageAlt ?? fallback.name),
+    videoUrl: str(c.videoUrl, fallback.videoUrl ?? ''),
+  };
+}
+
+function normalizeTestimonials(raw: unknown): HomeTestimonialsContent {
+  const d = DEFAULT_HOME_PAGE_CONFIG.testimonials;
+  if (!raw || typeof raw !== 'object') return d;
+  const c = raw as HomeTestimonialsContent;
+  const itemsRaw = Array.isArray(c.items) ? c.items : d.items;
+  return {
+    titleBefore: str(c.titleBefore, d.titleBefore),
+    titleHighlight: str(c.titleHighlight, d.titleHighlight),
+    subtitle: str(c.subtitle, d.subtitle),
+    showMoreLabel: str(c.showMoreLabel, d.showMoreLabel),
+    items: d.items.map((def, i) => normalizeTestimonialItem(itemsRaw[i], def)),
+  };
+}
+
 function normalizeWhyChooseUs(raw: unknown): HomeWhyChooseUsContent {
 
   const d = DEFAULT_HOME_PAGE_CONFIG.whyChooseUs;
@@ -559,6 +602,7 @@ export function mergeHomePageConfig(partial: HomePageConfigInput): HomePageConfi
     customKitchen: normalizeCustomKitchen(p.customKitchen),
     stats: normalizeStats(p.stats),
     whyChooseUs: normalizeWhyChooseUs(p.whyChooseUs),
+    testimonials: normalizeTestimonials(p.testimonials),
     signup: normalizeSignup(p.signup),
     cta: normalizeCta(p.cta),
   };

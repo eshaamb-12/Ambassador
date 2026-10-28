@@ -35,29 +35,59 @@ export default function ImageSlider({ slides: slidesProp }: ImageSliderProps) {
     currentRef.current = current;
   }, [current]);
 
-  const goTo = useCallback((idx: number, dir?: SlideDirection) => {
-    if (currentRef.current === idx) return;
-    setDirection(dir ?? resolveDirection(currentRef.current, idx, slides.length));
-    setAnimKey((k) => k + 1);
-    setCurrent(idx);
-  }, []);
+  const slideCount = slides.length;
 
-  const next = useCallback(() => goTo((current + 1) % slides.length, 'next'), [current, goTo, slides.length]);
-  const prev = useCallback(
-    () => goTo((current - 1 + slides.length) % slides.length, 'prev'),
-    [current, goTo, slides.length],
+  const goTo = useCallback(
+    (idx: number, dir?: SlideDirection) => {
+      if (slideCount <= 0) return;
+      const safeIdx = ((idx % slideCount) + slideCount) % slideCount;
+      if (currentRef.current === safeIdx) return;
+      setDirection(dir ?? resolveDirection(currentRef.current, safeIdx, slideCount));
+      setAnimKey((k) => k + 1);
+      setCurrent(safeIdx);
+    },
+    [slideCount],
   );
 
-  useEffect(() => {
-    if (current >= slides.length) setCurrent(0);
-  }, [slides.length, current]);
+  const next = useCallback(() => {
+    if (slideCount <= 1) return;
+    setCurrent((c) => {
+      const nextIdx = (c + 1) % slideCount;
+      setDirection('next');
+      setAnimKey((k) => k + 1);
+      return nextIdx;
+    });
+  }, [slideCount]);
 
-  // Auto-advance
+  const prev = useCallback(() => {
+    if (slideCount <= 1) return;
+    setCurrent((c) => {
+      const prevIdx = (c - 1 + slideCount) % slideCount;
+      setDirection('prev');
+      setAnimKey((k) => k + 1);
+      return prevIdx;
+    });
+  }, [slideCount]);
+
   useEffect(() => {
-    if (paused) return;
-    timerRef.current = setInterval(next, SLIDE_DURATION);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [next, paused]);
+    if (current >= slideCount) setCurrent(0);
+  }, [slideCount, current]);
+
+  // Auto-advance — always forward through all slides (stable timer, no stale index)
+  useEffect(() => {
+    if (paused || slideCount <= 1) return;
+    timerRef.current = setInterval(() => {
+      setCurrent((c) => {
+        const nextIdx = (c + 1) % slideCount;
+        setDirection('next');
+        setAnimKey((k) => k + 1);
+        return nextIdx;
+      });
+    }, SLIDE_DURATION);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [paused, slideCount]);
 
   const slide = slides[current];
   const isCenter = slide.align === 'center';

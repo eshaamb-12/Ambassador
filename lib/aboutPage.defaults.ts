@@ -1,3 +1,4 @@
+import { TESTIMONIAL_PORTRAIT_PATHS } from '@/lib/testimonialPortraits';
 import type { AboutPageConfig, AboutSectionId } from '@/lib/aboutPage.types';
 
 const SECTION_ORDER: AboutSectionId[] = [
@@ -107,42 +108,42 @@ export const DEFAULT_ABOUT_PAGE_CONFIG: AboutPageConfig = {
     items: [
       {
         name: 'Restaurant Owner — Lahore',
-        image: '/Images/about/person-1.avif',
+        image: TESTIMONIAL_PORTRAIT_PATHS[0],
         title: 'Excellent Service',
         text: 'Ambassador provided us with top-quality kitchen equipment that transformed our restaurant operations. Their after-sales support is outstanding!',
         rating: 5,
       },
       {
         name: 'Bakery Manager — Karachi',
-        image: '/Images/about/person-2.jpg',
+        image: TESTIMONIAL_PORTRAIT_PATHS[1],
         title: 'Reliable Partner',
         text: "We've been working with Ambassador for 5 years. They always deliver on time and provide the best equipment at competitive prices.",
         rating: 5,
       },
       {
         name: 'Hotel Chef — Islamabad',
-        image: '/Images/about/person-3.avif',
+        image: TESTIMONIAL_PORTRAIT_PATHS[2],
         title: 'Professional Quality',
         text: 'The commercial kitchen equipment from Ambassador meets international standards. Highly recommended for any food service establishment.',
         rating: 4,
       },
       {
         name: 'Catering Service — Faisalabad',
-        image: '/Images/about/person-4.avif',
+        image: TESTIMONIAL_PORTRAIT_PATHS[3],
         title: 'Great Value',
         text: 'Outstanding quality equipment at reasonable prices. Their team helped us choose the right products for our catering business.',
         rating: 5,
       },
       {
         name: 'Fast Food Chain Owner',
-        image: '/Images/about/person-5.jpg',
+        image: TESTIMONIAL_PORTRAIT_PATHS[4],
         title: 'Exceptional Support',
         text: 'Quick delivery and excellent customer service. The equipment is durable and has improved our efficiency significantly.',
         rating: 4,
       },
       {
         name: 'Hotel Manager — Rawalpindi',
-        image: '/Images/about/person-6.jpg',
+        image: TESTIMONIAL_PORTRAIT_PATHS[5],
         title: 'Outstanding Quality',
         text: 'The equipment from Ambassador has exceeded our expectations. Their professional team and quality products make them our preferred supplier.',
         rating: 5,

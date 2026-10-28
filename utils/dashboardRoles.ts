@@ -46,6 +46,7 @@ export const MANAGER_ALLOWED_PATHS = [
   '/category-management',
   '/spare-parts-management',
   '/gallery-management',
+  '/home-testimonials-management',
   '/blog-management',
   '/seo-tracking',
   '/pages-management',

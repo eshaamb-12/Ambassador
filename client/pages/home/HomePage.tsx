@@ -6,13 +6,19 @@ import SaleSection from '../../../components/home page/SaleSection';
 import CategoryCard from '../../../components/home page/CategoryCard';
 import StatsSection from '../../../components/home page/StatsSection';
 import WhyChooseUs from '../../../components/home page/WhyChooseUs';
+import HomeTestimonialsSection from '../../../components/home page/HomeTestimonialsSection';
 import SignupSection from '../../../components/home page/SignupSection';
 import CTASection from '../../../components/home page/CTASection';
 import ClientLogosSlider from '../../../components/about/ClientLogosSlider';
 import CustomKitchenHighlight from '../../../components/home page/CustomKitchenHighlight';
 import { useStorefrontCategories } from '@/hooks/useStorefrontCategories';
 import type { HomeCategoriesIntro, HomePageConfig, HomeSectionId } from '@/lib/sitePages.types';
-import { DEFAULT_HOME_PAGE_CONFIG } from '@/lib/homePage.defaults';
+import {
+  CLIENT_LOGOS_SLIDER_VISIBLE,
+  DEFAULT_HOME_PAGE_CONFIG,
+  HOME_STATS_SECTION_VISIBLE,
+  HOME_WHY_CHOOSE_US_SECTION_VISIBLE,
+} from '@/lib/homePage.defaults';
 import {
   homeSectionDescriptionLight,
   homeSectionEyebrowLight,
@@ -53,7 +59,7 @@ function HomeCategoriesSection({ intro }: { intro: HomeCategoriesIntro }) {
   const canShowLess = visibleRows > INITIAL_ROWS;
 
   return (
-    <section className="border-t border-gray-200 bg-[#E3E6E6]">
+    <section className="border-t border-[#EBF0F4] bg-[#EBF0F4]">
       <div className="container mx-auto px-4 py-8 sm:py-10 md:py-16">
         <div className="mb-8 text-center sm:mb-10 md:mb-12">
           <span className={`mb-3 inline-flex items-center gap-1.5 sm:mb-4 sm:gap-2 ${homeSectionEyebrowLight}`}>
@@ -148,10 +154,12 @@ const HomePage = ({ config: configProp }: HomePageProps) => {
     switch (id) {
       case 'hero':
         return <ImageSlider key="hero" slides={config.hero.slides} />;
+      case 'clientLogos':
+        return (
+          <ClientLogosSlider key="clientLogos" intro={config.clientLogos} variant="strip" />
+        );
       case 'sale':
         return <SaleSection key="sale" content={config.sale} />;
-      case 'clientLogos':
-        return <ClientLogosSlider key="clientLogos" intro={config.clientLogos} />;
       case 'customKitchen':
         return <CustomKitchenHighlight key="customKitchen" content={config.customKitchen} />;
       case 'categories':
@@ -160,6 +168,8 @@ const HomePage = ({ config: configProp }: HomePageProps) => {
         return <StatsSection key="stats" content={config.stats} />;
       case 'whyChooseUs':
         return <WhyChooseUs key="whyChooseUs" content={config.whyChooseUs} />;
+      case 'testimonials':
+        return <HomeTestimonialsSection key="testimonials" content={config.testimonials} />;
       case 'signup':
         return <SignupSection key="signup" content={config.signup} />;
       case 'cta':
@@ -172,7 +182,13 @@ const HomePage = ({ config: configProp }: HomePageProps) => {
   return (
     <div className="min-h-screen bg-white">
       {config.sections
-        .filter((s) => s.enabled)
+        .filter(
+          (s) =>
+            s.enabled &&
+            (CLIENT_LOGOS_SLIDER_VISIBLE || s.id !== 'clientLogos') &&
+            (HOME_STATS_SECTION_VISIBLE || s.id !== 'stats') &&
+            (HOME_WHY_CHOOSE_US_SECTION_VISIBLE || s.id !== 'whyChooseUs'),
+        )
         .map((s) => renderSection(s.id))}
     </div>
   );

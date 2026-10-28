@@ -72,7 +72,7 @@ const navLinkClass = (active: boolean) =>
 
       ? 'text-[#E36630] border-b-2 border-[#E36630]'
 
-      : 'text-white hover:text-[#E36630] border-b-2 border-transparent hover:border-[#E36630]/40'
+      : 'text-[#0F4C69] hover:text-[#E36630] border-b-2 border-transparent hover:border-[#E36630]/40'
 
     }
 
@@ -128,7 +128,7 @@ const NavigationHeader = () => {
 
   return (
 
-    <nav className="bg-[#0F4C69] text-white shadow-md sticky top-16 z-40">
+    <nav className="bg-[#EBF0F4] text-[#0F4C69] shadow-md sticky top-16 z-40">
 
       <div className="container mx-auto px-4">
 
@@ -221,7 +221,7 @@ const NavigationHeader = () => {
                           mx-2 block rounded-xl px-4 py-2.5 text-sm font-medium transition-colors
                           ${isActive(item.href)
                             ? 'bg-[#E36630]/10 text-[#E36630]'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-[#0F4C69]'
+                            : 'text-[#0F4C69] hover:bg-[#EBF0F4] hover:text-[#0d3d55]'
                           }
                         `}
                       >
@@ -236,7 +236,7 @@ const NavigationHeader = () => {
 
 
 
-            <li className="ml-2 flex items-center self-center border-l border-white/15 pl-3">
+            <li className="ml-2 flex items-center self-center border-l border-[#0F4C69]/15 pl-3">
 
               <Link
 
@@ -248,9 +248,9 @@ const NavigationHeader = () => {
 
                   ${careersActive
 
-                    ? 'bg-white text-[#E36630] ring-2 ring-white/40'
+                    ? 'bg-white text-[#E36630] ring-2 ring-[#0F4C69]/20'
 
-                    : 'bg-[#E36630] text-white hover:bg-[#cc5a2a] hover:shadow-lg'
+                    : 'bg-[#0F4C69] text-white hover:bg-[#0d3d55] hover:shadow-lg'
 
                   }
 
@@ -261,23 +261,6 @@ const NavigationHeader = () => {
                 <CareersIcon className="h-4 w-4 shrink-0" />
 
                 Careers
-
-                <span
-
-                  className={`
-
-                    ml-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide
-
-                    ${careersActive ? 'bg-[#E36630]/10 text-[#E36630]' : 'bg-white/20 text-white'}
-
-                  `}
-
-                >
-
-                  Hiring
-
-                </span>
-
               </Link>
 
             </li>
@@ -288,13 +271,13 @@ const NavigationHeader = () => {
 
           {/* Contact info — highlighted */}
 
-          <div className="flex items-center shrink-0 divide-x divide-white/20">
+          <div className="flex items-center shrink-0 divide-x divide-[#0F4C69]/15">
 
             <a
 
               href="tel:+923331166925"
 
-              className="flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 transition-colors hover:text-[#E36630]"
+              className="flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 text-[#0F4C69] transition-colors hover:text-[#E36630]"
 
             >
 
@@ -304,7 +287,7 @@ const NavigationHeader = () => {
 
               </svg>
 
-              <span className="text-white text-sm">0333-1166925</span>
+              <span className="text-sm">0333-1166925</span>
 
             </a>
 
@@ -312,7 +295,7 @@ const NavigationHeader = () => {
 
               href="tel:+923314937412"
 
-              className="flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 transition-colors hover:text-[#E36630]"
+              className="flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 text-[#0F4C69] transition-colors hover:text-[#E36630]"
 
             >
 
@@ -322,7 +305,7 @@ const NavigationHeader = () => {
 
               </svg>
 
-              <span className="text-white text-sm">UAN: +923363333111</span>
+              <span className="text-sm">UAN: +923363333111</span>
 
             </a>
 
@@ -330,7 +313,7 @@ const NavigationHeader = () => {
 
               href="tel:042111313106"
 
-              className="flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 transition-colors hover:text-[#E36630]"
+              className="flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 text-[#0F4C69] transition-colors hover:text-[#E36630]"
 
             >
 
@@ -340,7 +323,7 @@ const NavigationHeader = () => {
 
               </svg>
 
-              <span className="text-white text-sm">UAN: 042-111-313-106</span>
+              <span className="text-sm">UAN: 042-111-313-106</span>
 
             </a>
 
@@ -362,7 +345,7 @@ const NavigationHeader = () => {
 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
 
-              className="text-white hover:text-[#E36630] focus:outline-none transition-colors"
+              className="text-[#0F4C69] hover:text-[#E36630] focus:outline-none transition-colors"
 
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
 
@@ -559,7 +542,7 @@ const NavigationHeader = () => {
                                 block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
                                 ${isActive(item.href)
                                   ? 'bg-[#E36630]/10 text-[#E36630]'
-                                  : 'text-gray-700 hover:bg-gray-50 hover:text-[#0F4C69]'
+                                  : 'text-[#0F4C69] hover:bg-[#EBF0F4] hover:text-[#0d3d55]'
                                 }
                               `}
                             >

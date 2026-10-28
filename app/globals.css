@@ -68,6 +68,84 @@ body {
 .slider-image-enter-prev { animation: slider-image-from-left 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 .slider-progress         { animation: progress-bar var(--slide-duration, 6s) linear forwards; }
 
+/* Home testimonials — card width = share of scrollport (4 across on lg+) */
+.testimonial-track {
+  --testimonial-gap: 1rem;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.testimonial-track.testimonial-track--smooth-scroll {
+  scroll-snap-type: none;
+}
+.testimonial-card {
+  scroll-snap-align: start;
+}
+.testimonial-track-full {
+  --testimonial-edge-pad: 3.25rem;
+  padding-left: var(--testimonial-edge-pad);
+  padding-right: var(--testimonial-edge-pad);
+}
+@media (min-width: 640px) {
+  .testimonial-track-full {
+    --testimonial-edge-pad: 3.75rem;
+  }
+}
+@media (min-width: 1024px) {
+  .testimonial-track-full {
+    --testimonial-edge-pad: 4.25rem;
+  }
+}
+@media (min-width: 640px) {
+  .testimonial-track {
+    --testimonial-gap: 1.25rem;
+  }
+}
+@media (min-width: 1024px) {
+  .testimonial-track {
+    --testimonial-gap: 1.5rem;
+  }
+}
+.testimonial-card {
+  flex: 0 0 min(88vw, 18rem);
+  width: min(88vw, 18rem);
+}
+.testimonial-track-full .testimonial-card {
+  flex: 0 0 calc(100vw - 2 * var(--testimonial-edge-pad));
+  width: calc(100vw - 2 * var(--testimonial-edge-pad));
+}
+@media (min-width: 640px) {
+  .testimonial-card {
+    flex: 0 0 calc((100% - var(--testimonial-gap)) / 2);
+    width: calc((100% - var(--testimonial-gap)) / 2);
+  }
+  .testimonial-track-full .testimonial-card {
+    flex: 0 0 calc((100vw - 2 * var(--testimonial-edge-pad) - var(--testimonial-gap)) / 2);
+    width: calc((100vw - 2 * var(--testimonial-edge-pad) - var(--testimonial-gap)) / 2);
+  }
+}
+@media (min-width: 768px) {
+  .testimonial-card {
+    flex: 0 0 calc((100% - 2 * var(--testimonial-gap)) / 3);
+    width: calc((100% - 2 * var(--testimonial-gap)) / 3);
+  }
+  .testimonial-track-full .testimonial-card {
+    flex: 0 0 calc((100vw - 2 * var(--testimonial-edge-pad) - 2 * var(--testimonial-gap)) / 3);
+    width: calc((100vw - 2 * var(--testimonial-edge-pad) - 2 * var(--testimonial-gap)) / 3);
+  }
+}
+@media (min-width: 1024px) {
+  .testimonial-card {
+    flex: 0 0 calc((100% - 3 * var(--testimonial-gap)) / 4);
+    width: calc((100% - 3 * var(--testimonial-gap)) / 4);
+  }
+  .testimonial-track-full .testimonial-card {
+    flex: 0 0 calc((100vw - 2 * var(--testimonial-edge-pad) - 3 * var(--testimonial-gap)) / 4);
+    width: calc((100vw - 2 * var(--testimonial-edge-pad) - 3 * var(--testimonial-gap)) / 4);
+  }
+}
+
 /* WhatsApp chat widget — attention bubble animation */
 @keyframes bounce-once {
   0%, 100% { transform: translateY(0); }

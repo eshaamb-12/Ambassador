@@ -6,6 +6,7 @@ export type HomeSectionId =
   | 'categories'
   | 'stats'
   | 'whyChooseUs'
+  | 'testimonials'
   | 'signup'
   | 'cta';
 
@@ -98,6 +99,25 @@ export interface HomeWhyChooseUsContent {
   reasons: HomeWhyReason[];
 }
 
+export interface HomeTestimonialItem {
+  name: string;
+  profession: string;
+  description: string;
+  /** Optional legacy poster; storefront cards use videoUrl for media. */
+  image?: string;
+  imageAlt?: string;
+  /** Uploaded file or YouTube link — main card video and “Show more”. */
+  videoUrl?: string;
+}
+
+export interface HomeTestimonialsContent {
+  titleBefore: string;
+  titleHighlight: string;
+  subtitle: string;
+  showMoreLabel: string;
+  items: HomeTestimonialItem[];
+}
+
 export interface HomeSignupBenefit {
   title: string;
   description: string;
@@ -143,6 +163,7 @@ export interface HomePageConfig {
   customKitchen: HomeCustomKitchenContent;
   stats: HomeStatsContent;
   whyChooseUs: HomeWhyChooseUsContent;
+  testimonials: HomeTestimonialsContent;
   signup: HomeSignupContent;
   cta: HomeCtaContent;
 }
@@ -197,6 +218,7 @@ export const HOME_SECTION_LABELS: Record<HomeSectionId, string> = {
   categories: 'Product categories grid',
   stats: 'Stats / trust bar',
   whyChooseUs: 'Why choose us',
+  testimonials: 'Testimonials carousel',
   signup: 'Sign up section',
   cta: 'Bottom call to action',
 };

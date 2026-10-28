@@ -27,7 +27,7 @@ const SignupSection = ({ content: contentProp }: SignupSectionProps) => {
   if (user) return null;
 
   return (
-    <section className="border-t border-gray-100 bg-[#FAFAFA] py-8 sm:py-10 md:py-16">
+    <section className=" bg-[#EBF0F4] py-8 sm:py-10 md:py-16">
       <div className="container mx-auto px-4">
         <div className="flex flex-col overflow-hidden rounded-2xl shadow-[0_-4px_24px_0_rgba(0,0,0,0.08),0_8px_24px_0_rgba(0,0,0,0.10)] lg:flex-row">
           <div className="flex-1 bg-white p-6 sm:p-10 lg:p-14">

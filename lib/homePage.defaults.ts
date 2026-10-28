@@ -264,9 +264,10 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
     ],
   },
   testimonials: {
-    titleBefore: 'Real Stories from',
-    titleHighlight: 'Real Kitchens',
-    subtitle: 'Hear from chefs, owners, and operators who equip with Ambassador across Pakistan.',
+    titleBefore: 'Customer',
+    titleHighlight: 'Testimonials',
+    subtitle:
+      'Watch short videos from chefs, owners, and operators across Pakistan sharing how Ambassador supports their commercial kitchens.',
     showMoreLabel: 'Show More',
     items: [
       {

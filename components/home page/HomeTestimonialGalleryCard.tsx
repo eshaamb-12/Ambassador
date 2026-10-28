@@ -201,14 +201,6 @@ export default function HomeTestimonialGalleryCard({ item, isClone = false }: Ho
             aria-hidden
           />
 
-          <div
-            className="pointer-events-none absolute bottom-3 left-3 z-[2] flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#0F4C69] shadow-sm backdrop-blur-sm sm:text-[11px]"
-            aria-hidden
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#E36630] animate-pulse" />
-            Story
-          </div>
-
           <TestimonialCardMedia item={item} isClone={isClone} />
         </div>
 

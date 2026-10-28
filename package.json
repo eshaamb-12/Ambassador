@@ -6,12 +6,12 @@
     "node": ">=20.0.0 <23.0.0"
   },
   "scripts": {
-    "dev": "node scripts/next-dev.mjs",
-    "dev:clean": "node scripts/next-dev.mjs",
+    "dev": "node api.js && node scripts/next-dev.mjs",
+    "dev:clean": "node api.js && node scripts/next-dev.mjs",
     "clean:cache": "node scripts/clean-next-cache.mjs",
     "cache:clear": "node scripts/clean-next-cache.mjs",
     "build": "node scripts/next-build.mjs",
-    "start": "node server.js",
+    "start": "node api.js && node server.js",
     "lint": "eslint",
     "seed:admin": "npx ts-node --project tsconfig.seed.json backend/seeds/admin.seed.ts",
     "seed:admin:reset": "npx ts-node --project tsconfig.seed.json backend/seeds/admin.seed.ts -- --reset-password",

@@ -31,6 +31,8 @@ import {
 } from '@/lib/siteRoutes';
 import { useStorefrontCategories } from '@/hooks/useStorefrontCategories';
 import { PRODUCT_PLACEHOLDER } from '@/utils/productMedia.util';
+import type { PublicListingProduct } from '@/backend/lib/queryPublicProducts';
+import type { StorefrontCategory } from '@/lib/storefrontCategories';
 
 interface ApiCategoryRef {
   _id?: string;
@@ -478,9 +480,21 @@ interface ProductsPageProps {
   categorySlugFromPath?: string;
   /** `used` — pre-owned catalog at /used-equipment */
   catalog?: StorefrontProductCatalog;
+  initialCategories?: StorefrontCategory[];
+  initialListing?: {
+    rows: PublicListingProduct[];
+    total: number;
+    totalPages: number;
+    page: number;
+  };
 }
 
-const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPageProps = {}) => {
+const ProductsPage = ({
+  categorySlugFromPath,
+  catalog = 'new',
+  initialCategories,
+  initialListing,
+}: ProductsPageProps = {}) => {
   const isUsedCatalog = catalog === 'used';
   const listingBasePath = isUsedCatalog ? USED_EQUIPMENT_PATH : PRODUCTS_PATH;
   const categoryPathForSlug = isUsedCatalog ? usedEquipmentCategoryPath : productsCategoryPath;
@@ -497,8 +511,11 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
   const categoryOptionRefs = useRef<Map<string, HTMLLabelElement>>(new Map());
 
   // ── Initialise all filter state from URL on first render ──
-  const [products,  setProducts]  = useState<Product[]>([]);
-  const { categories: storefrontCategories } = useStorefrontCategories();
+  const [products, setProducts] = useState<Product[]>(() =>
+    initialListing ? initialListing.rows.map(mapApiToProduct) : [],
+  );
+  const skipInitialListingFetch = useRef(Boolean(initialListing));
+  const { categories: storefrontCategories } = useStorefrontCategories(initialCategories);
   const categoryMeta = useMemo(
     () =>
       storefrontCategories
@@ -510,10 +527,10 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
     () => [ALL, ...storefrontCategories.map((c) => c.title).filter(Boolean)],
     [storefrontCategories],
   );
-  const [loading,   setLoading]   = useState(true);
+  const [loading, setLoading] = useState(!initialListing);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [total,     setTotal]     = useState(0);
-  const [totalPages,setTotalPages]= useState(0);
+  const [total, setTotal] = useState(initialListing?.total ?? 0);
+  const [totalPages, setTotalPages] = useState(initialListing?.totalPages ?? 0);
 
   const [selectedCategory, setSelectedCategory] = useState(
     () => searchParams.get('category') || ALL,
@@ -754,6 +771,12 @@ const ProductsPage = ({ categorySlugFromPath, catalog = 'new' }: ProductsPagePro
   // Fetch products from server whenever any filter or page changes
   useEffect(() => {
     let cancelled = false;
+
+    if (skipInitialListingFetch.current) {
+      skipInitialListingFetch.current = false;
+      return;
+    }
+
     (async () => {
       setLoading(true);
       setLoadError(null);

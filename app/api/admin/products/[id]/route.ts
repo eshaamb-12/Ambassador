@@ -18,6 +18,7 @@ import {
 import { productPricingFromBody } from '@/backend/lib/productPriceRules';
 import { requireAdmin, requireFullAdmin, rejectManagerStatusChange } from '@/backend/lib/adminAuth';
 import { parseWeightKg } from '@/lib/shippingQuote';
+import { revalidateStorefrontProduct } from '@/lib/server/revalidateStorefrontProduct';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -169,7 +170,14 @@ export async function PATCH(
     }
 
     await product.save();
-    const populated = await product.populate([{ path: 'categories', select: 'title' }]);
+    const populated = await product.populate([{ path: 'categories', select: 'title slug' }]);
+
+    revalidateStorefrontProduct({
+      _id: populated._id,
+      slug: populated.slug,
+      status: populated.status,
+      categories: populated.categories as { slug?: string }[],
+    });
 
     return NextResponse.json(
       { success: true, message: 'Product updated.', data: populated },
@@ -193,10 +201,17 @@ export async function DELETE(
     await connectDB();
     const { id } = await params;
 
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).populate('categories', 'slug');
     if (!product) {
       return NextResponse.json({ success: false, message: 'Product not found.' }, { status: 404 });
     }
+
+    revalidateStorefrontProduct({
+      _id: product._id,
+      slug: product.slug,
+      status: product.status,
+      categories: product.categories as { slug?: string }[],
+    });
 
     await destroyProductMedia(product);
 

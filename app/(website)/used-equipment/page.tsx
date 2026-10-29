@@ -1,9 +1,8 @@
-import { Suspense } from 'react';
 import { permanentRedirect } from 'next/navigation';
 import connectDB from '@/backend/config/db';
 import Category from '@/backend/models/Category.model';
 import ProductsPage from '@/client/pages/products/ProductsPage';
-import PageLoader from '@/components/ui/PageLoader';
+import { loadProductsListingForPage } from '@/lib/server/productsListingSsr';
 import { usedEquipmentCategoryPath } from '@/lib/siteRoutes';
 
 type Props = {
@@ -42,13 +41,21 @@ export default async function UsedEquipmentListingPage({ searchParams }: Props) 
     }
   }
 
+  const { categories, listing } = await loadProductsListingForPage({
+    searchParams: sp,
+    usedCatalog: true,
+  });
+
   return (
-    <Suspense
-      fallback={
-        <PageLoader message="Loading used equipment…" fullScreen={false} className="min-h-[60vh]" />
-      }
-    >
-      <ProductsPage catalog="used" />
-    </Suspense>
+    <ProductsPage
+      catalog="used"
+      initialCategories={categories}
+      initialListing={{
+        rows: listing.data,
+        total: listing.total,
+        totalPages: listing.totalPages,
+        page: listing.page,
+      }}
+    />
   );
 }

@@ -6,14 +6,18 @@ import {
   type StorefrontCategory,
 } from '@/lib/storefrontCategories';
 
-export function useStorefrontCategories() {
-  const [categories, setCategories] = useState<StorefrontCategory[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useStorefrontCategories(initial?: StorefrontCategory[]) {
+  const [categories, setCategories] = useState<StorefrontCategory[]>(initial ?? []);
+  const [loading, setLoading] = useState(!initial?.length);
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
+      if (initial?.length) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const data = await fetchStorefrontCategories();
@@ -28,7 +32,7 @@ export function useStorefrontCategories() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initial]);
 
   return { categories, loading };
 }

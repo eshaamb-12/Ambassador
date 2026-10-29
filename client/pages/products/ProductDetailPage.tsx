@@ -27,31 +27,16 @@ import {
 } from '@/lib/siteRoutes';
 import { orderedSpecificationEntries } from '@/lib/productSpecifications';
 import { productHasCustomization, productHasListedPrice } from '@/lib/productFeatures';
+import type {
+  PublicProductDetail,
+  PublicProductReview,
+} from '@/backend/lib/getPublicProductDetail';
 interface CategoryRef {
   title?: string;
   slug?: string;
 }
 
-interface ProductDetail {
-  _id: string;
-  slug?: string;
-  name: string;
-  about: string;
-  price?: number;
-  originalPrice: number;
-  stock: number;
-  images: string[];
-  imagePublicIds?: string[];
-  videos: string[];
-  videoPublicIds?: string[];
-  brands?: unknown;
-  specifications: Record<string, string>;
-  specificationOrder?: string[];
-  categories: CategoryRef[];
-  features?: string[];
-  avgRating: number;
-  reviewCount: number;
-}
+type ProductDetail = PublicProductDetail;
 
 interface CatalogProductRow {
   _id: string;
@@ -160,13 +145,19 @@ function ProductBuyRow({
   );
 }
 
-const ProductDetailPage = ({ productId }: { productId: string }) => {
+type ProductDetailPageProps = {
+  productId: string;
+  initialProduct?: PublicProductDetail;
+  initialReviews?: PublicProductReview[];
+};
+
+const ProductDetailPage = ({ productId, initialProduct, initialReviews }: ProductDetailPageProps) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [product, setProduct] = useState<ProductDetail | null>(null);
-  const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [product, setProduct] = useState<ProductDetail | null>(initialProduct ?? null);
+  const [reviews, setReviews] = useState<ReviewRow[]>(initialReviews ?? []);
   const [relatedProducts, setRelatedProducts] = useState<CatalogProductRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialProduct);
   const [notFound, setNotFound] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -174,6 +165,12 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
   const [showAllSpecs, setShowAllSpecs] = useState(false);
   const [showCartPopup, setShowCartPopup] = useState(false);
   const relatedScrollRef = useRef<HTMLDivElement>(null);
+  const skipInitialClientFetch = useRef(
+    Boolean(
+      initialProduct &&
+        productUrlSegment(initialProduct).toLowerCase() === productId.trim().toLowerCase(),
+    ),
+  );
   const { addToCart } = useCart();
 
   const galleryImages = useMemo(
@@ -219,6 +216,12 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
 
   useEffect(() => {
     let cancelled = false;
+
+    if (skipInitialClientFetch.current) {
+      skipInitialClientFetch.current = false;
+      return;
+    }
+
     (async () => {
       setLoading(true);
       setNotFound(false);

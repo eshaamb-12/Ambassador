@@ -3,10 +3,13 @@ import connectDB from '@/backend/config/db';
 import Category from '@/backend/models/Category.model';
 import Product from '@/backend/models/Product.model';
 import { categoryListSort } from '@/backend/lib/categoryOrder';
-import { getCaseStudySlugs } from '@/client/data/customKitchenCases';
 import { productsCategoryPath, productDetailPath } from '@/lib/siteRoutes';
 import { absoluteUrl } from '@/lib/siteUrl';
-import { MAIN_CATALOG_FILTER } from '@/backend/lib/productTypeFilters';
+/** All storefront products (new + used); spare parts live in a separate collection. */
+const SITEMAP_PRODUCT_FILTER = {
+  status: 'active' as const,
+  productType: { $ne: 'spare_part' as const },
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -21,10 +24,7 @@ const STATIC_PAGES: StaticPage[] = [
   { path: '/about', priority: 0.8, changeFrequency: 'monthly' },
   { path: '/contact', priority: 0.7, changeFrequency: 'monthly' },
   { path: '/branches', priority: 0.7, changeFrequency: 'monthly' },
-  { path: '/gallery', priority: 0.7, changeFrequency: 'weekly' },
-  { path: '/custom-kitchen', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/products', priority: 0.9, changeFrequency: 'daily' },
-  { path: '/used-equipment', priority: 0.85, changeFrequency: 'daily' },
   { path: '/returns', priority: 0.4, changeFrequency: 'yearly' },
 ];
 
@@ -52,15 +52,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  for (const slug of getCaseStudySlugs()) {
-    pushEntry(entries, seen, {
-      url: absoluteUrl(`/custom-kitchen/${encodeURIComponent(slug)}`),
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    });
-  }
-
   try {
     await connectDB();
 
@@ -82,9 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
 
-    const products = await Product.find({ status: 'active', ...MAIN_CATALOG_FILTER })
-      .select('slug updatedAt')
-      .lean();
+    const products = await Product.find(SITEMAP_PRODUCT_FILTER).select('slug updatedAt').lean();
 
     for (const product of products) {
       const segment = (product.slug || String(product._id)).trim().toLowerCase();

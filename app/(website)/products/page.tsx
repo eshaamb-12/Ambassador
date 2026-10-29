@@ -1,9 +1,8 @@
-import { Suspense } from 'react';
 import { permanentRedirect } from 'next/navigation';
 import connectDB from '@/backend/config/db';
 import Category from '@/backend/models/Category.model';
 import ProductsPage from '@/client/pages/products/ProductsPage';
-import PageLoader from '@/components/ui/PageLoader';
+import { loadProductsListingForPage } from '@/lib/server/productsListingSsr';
 import { productsCategoryPath } from '@/lib/siteRoutes';
 
 type Props = {
@@ -40,9 +39,17 @@ export default async function ProductsListingPage({ searchParams }: Props) {
     }
   }
 
+  const { categories, listing } = await loadProductsListingForPage({ searchParams: sp });
+
   return (
-    <Suspense fallback={<PageLoader message="Loading products…" fullScreen={false} className="min-h-[60vh]" />}>
-      <ProductsPage />
-    </Suspense>
+    <ProductsPage
+      initialCategories={categories}
+      initialListing={{
+        rows: listing.data,
+        total: listing.total,
+        totalPages: listing.totalPages,
+        page: listing.page,
+      }}
+    />
   );
 }

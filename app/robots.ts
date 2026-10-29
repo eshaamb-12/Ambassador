@@ -42,7 +42,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
+      allow: ['/', '/api/products', '/api/products/', '/api/categories'],
       disallow: DISALLOW_PREFIXES,
     },
     sitemap: absoluteUrl('/sitemap.xml'),

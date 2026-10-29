@@ -21,6 +21,7 @@ import {
   sortProductsByIdOrder,
 } from '@/backend/lib/adminProductSearch';
 import { parseWeightKg } from '@/lib/shippingQuote';
+import { revalidateStorefrontProduct } from '@/lib/server/revalidateStorefrontProduct';
 import mongoose from 'mongoose';
 
 const FUZZY_CANDIDATE_CAP = 4000;
@@ -238,7 +239,14 @@ export async function POST(req: NextRequest) {
       isUsed: Boolean(isUsed),
     });
 
-    const populated = await product.populate([{ path: 'categories', select: 'title' }]);
+    const populated = await product.populate([{ path: 'categories', select: 'title slug' }]);
+
+    revalidateStorefrontProduct({
+      _id: populated._id,
+      slug: populated.slug,
+      status: populated.status,
+      categories: populated.categories as { slug?: string }[],
+    });
 
     return NextResponse.json(
       { success: true, message: 'Product created successfully.', data: populated },

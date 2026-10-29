@@ -1,16 +1,16 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { permanentRedirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import connectDB from '@/backend/config/db';
 import Category from '@/backend/models/Category.model';
 import { findActiveProductByIdentifier } from '@/backend/lib/findPublicProduct';
 import ProductsPage from '@/client/pages/products/ProductsPage';
-import PageLoader from '@/components/ui/PageLoader';
+import { loadProductsListingForPage } from '@/lib/server/productsListingSsr';
 import { productDetailPath, productUrlSegment, usedEquipmentCategoryPath } from '@/lib/siteRoutes';
 import { absoluteUrl, canonicalMetadata } from '@/lib/siteUrl';
 
 type Props = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 async function findActiveCategoryBySlug(slug: string) {
@@ -58,22 +58,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /** /used-equipment/[slug] — category listing; product slugs redirect to /products/[slug]. */
-export default async function UsedEquipmentSegmentPage({ params }: Props) {
+export default async function UsedEquipmentSegmentPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const sp = await searchParams;
   const decoded = decodeURIComponent(slug).trim();
 
   await connectDB();
 
   const category = await findActiveCategoryBySlug(decoded);
   if (category?.slug) {
+    const { categories, listing } = await loadProductsListingForPage({
+      searchParams: sp,
+      categorySlugFromPath: category.slug,
+      usedCatalog: true,
+    });
+
     return (
-      <Suspense
-        fallback={
-          <PageLoader message="Loading used equipment…" fullScreen={false} className="min-h-[60vh]" />
-        }
-      >
-        <ProductsPage catalog="used" categorySlugFromPath={category.slug} />
-      </Suspense>
+      <ProductsPage
+        catalog="used"
+        categorySlugFromPath={category.slug}
+        initialCategories={categories}
+        initialListing={{
+          rows: listing.data,
+          total: listing.total,
+          totalPages: listing.totalPages,
+          page: listing.page,
+        }}
+      />
     );
   }
 
@@ -82,13 +93,5 @@ export default async function UsedEquipmentSegmentPage({ params }: Props) {
     permanentRedirect(productDetailPath(productUrlSegment(product)));
   }
 
-  return (
-    <Suspense
-      fallback={
-        <PageLoader message="Loading used equipment…" fullScreen={false} className="min-h-[60vh]" />
-      }
-    >
-      <ProductsPage catalog="used" categorySlugFromPath={decoded} />
-    </Suspense>
-  );
+  notFound();
 }

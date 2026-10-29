@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: 'Products | Ambassador Commercial Kitchen Equipment',
   description:
     'Browse commercial kitchen equipment, restaurant supplies, and food service solutions in Pakistan.',
+  robots: { index: true, follow: true },
   ...canonicalMetadata(PRODUCTS_PATH),
   openGraph: {
     title: 'Products | Ambassador Commercial Kitchen Equipment',

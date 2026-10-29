@@ -1,17 +1,19 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { permanentRedirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import connectDB from '@/backend/config/db';
 import Category from '@/backend/models/Category.model';
+import { getPublicProductDetail } from '@/backend/lib/getPublicProductDetail';
 import { findActiveProductByIdentifier } from '@/backend/lib/findPublicProduct';
 import ProductsPage from '@/client/pages/products/ProductsPage';
 import ProductDetailPage from '@/client/pages/products/ProductDetailPage';
-import PageLoader from '@/components/ui/PageLoader';
+import ProductJsonLd from '@/components/seo/ProductJsonLd';
+import { loadProductsListingForPage } from '@/lib/server/productsListingSsr';
 import { productDetailPath, productUrlSegment, productsCategoryPath } from '@/lib/siteRoutes';
 import { absoluteUrl, canonicalMetadata } from '@/lib/siteUrl';
 
 type Props = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 async function findActiveCategoryBySlug(slug: string) {
@@ -43,6 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return {
         title,
         description,
+        robots: { index: true, follow: true },
         ...canonicalMetadata(canonicalPath),
         openGraph: {
           title,
@@ -63,6 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return {
         title,
         description,
+        robots: { index: true, follow: true },
         ...canonicalMetadata(canonicalPath),
         openGraph: {
           title,
@@ -75,22 +79,38 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     console.error('[products/[slug] generateMetadata]', error);
   }
 
-  return { title: 'Products | Ambassador Commercial Kitchen Equipment' };
+  return {
+    title: 'Products | Ambassador Commercial Kitchen Equipment',
+    robots: { index: true, follow: true },
+  };
 }
 
 /** /products/[slug] — product detail or category listing (single canonical URL per page). */
-export default async function ProductsSegmentPage({ params }: Props) {
+export default async function ProductsSegmentPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const sp = await searchParams;
   const decoded = decodeURIComponent(slug).trim();
 
   await connectDB();
 
   const category = await findActiveCategoryBySlug(decoded);
   if (category?.slug) {
+    const { categories, listing } = await loadProductsListingForPage({
+      searchParams: sp,
+      categorySlugFromPath: category.slug,
+    });
+
     return (
-      <Suspense fallback={<PageLoader message="Loading products…" fullScreen={false} className="min-h-[60vh]" />}>
-        <ProductsPage categorySlugFromPath={category.slug} />
-      </Suspense>
+      <ProductsPage
+        categorySlugFromPath={category.slug}
+        initialCategories={categories}
+        initialListing={{
+          rows: listing.data,
+          total: listing.total,
+          totalPages: listing.totalPages,
+          page: listing.page,
+        }}
+      />
     );
   }
 
@@ -104,20 +124,22 @@ export default async function ProductsSegmentPage({ params }: Props) {
       permanentRedirect(productDetailPath(canonicalSlug));
     }
 
+    const detail = await getPublicProductDetail(canonicalSlug);
+    if (detail.status === 'not_found' || detail.status === 'unavailable') {
+      notFound();
+    }
+
     return (
-      <Suspense
-        fallback={
-          <PageLoader message="Loading product…" fullScreen={false} className="min-h-[60vh]" />
-        }
-      >
-        <ProductDetailPage productId={canonicalSlug} />
-      </Suspense>
+      <>
+        <ProductJsonLd product={detail.product} />
+        <ProductDetailPage
+          productId={canonicalSlug}
+          initialProduct={detail.product}
+          initialReviews={detail.reviews}
+        />
+      </>
     );
   }
 
-  return (
-    <Suspense fallback={<PageLoader message="Loading products…" fullScreen={false} className="min-h-[60vh]" />}>
-      <ProductsPage categorySlugFromPath={decoded} />
-    </Suspense>
-  );
+  notFound();
 }

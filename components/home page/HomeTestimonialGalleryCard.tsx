@@ -108,14 +108,14 @@ function TestimonialCardMedia({ item, isClone }: { item: HomeTestimonialItem; is
   const showLoader = loadMedia && !mediaReady && !mediaError;
 
   return (
-    <div ref={rootRef} className="absolute inset-0 z-0 bg-[#EBF0F4]">
+    <div ref={rootRef} className="absolute inset-0 z-0 bg-[#0f172a]">
       {!loadMedia ? (
         thumbUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={thumbUrl}
             alt=""
-            className="h-full w-full object-cover opacity-90"
+            className="h-full w-full object-cover object-center opacity-90"
             loading="lazy"
             decoding="async"
           />
@@ -152,7 +152,7 @@ function TestimonialCardMedia({ item, isClone }: { item: HomeTestimonialItem; is
             <video
               key={retryKey}
               src={directVideoUrl}
-              className={`relative z-0 h-full w-full object-cover transition-opacity duration-300 ${mediaReady ? 'opacity-100' : 'opacity-0'}`}
+              className={`absolute inset-0 z-0 h-full w-full object-cover object-center transition-opacity duration-300 ${mediaReady ? 'opacity-100' : 'opacity-0'}`}
               controls
               preload="metadata"
               playsInline
@@ -169,19 +169,11 @@ function TestimonialCardMedia({ item, isClone }: { item: HomeTestimonialItem; is
   );
 }
 
-function QuoteIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.45l.665 1.262C6.33 7.908 4.5 10.348 4.5 13.011c0 1.396.385 2.396 1.083 3.31l-1 .001zm9 0c-1.03-1.094-1.583-2.321-1.583-4.31 0-3.5 2.457-6.637 6.03-8.45l.665 1.262c-2.868 1.135-4.697 3.575-4.697 6.238 0 1.396.385 2.396 1.083 3.31l-1 .001z" />
-    </svg>
-  );
-}
-
 export default function HomeTestimonialGalleryCard({ item, isClone = false }: HomeTestimonialGalleryCardProps) {
   return (
     <div
       data-testimonial-card
-      className="group/card testimonial-card h-[32rem] w-[min(88vw,18rem)] shrink-0 grow-0 snap-start rounded-2xl transition-all duration-300 ease-out hover:-translate-y-1.5 sm:h-[36rem] md:h-[38rem] lg:h-[40rem] xl:h-[42rem] [box-shadow:var(--testimonial-card-shadow)] hover:[box-shadow:var(--testimonial-card-shadow-hover)]"
+      className="group/card testimonial-card h-auto shrink-0 grow-0 snap-start rounded-xl transition-all duration-300 ease-out hover:-translate-y-0.5 sm:rounded-2xl [box-shadow:var(--testimonial-card-shadow)] hover:[box-shadow:var(--testimonial-card-shadow-hover)]"
       style={
         {
           '--testimonial-card-shadow': T.cardShadow,
@@ -190,14 +182,12 @@ export default function HomeTestimonialGalleryCard({ item, isClone = false }: Ho
       }
     >
       <article
-        className="flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-white transition-colors duration-300 group-hover/card:border-[#0F4C69]/25"
+        className="testimonial-card-inner overflow-hidden rounded-xl border bg-white transition-colors duration-300 group-hover/card:border-[#0F4C69]/25 sm:rounded-2xl"
         style={{ borderColor: T.cardBorder }}
       >
-        <div className="h-1 shrink-0 bg-gradient-to-r from-[#E36630] via-[#0F4C69] to-[#E36630]" aria-hidden />
-
-        <div className="relative min-h-0 flex-1 bg-[#EBF0F4]">
+        <div className="testimonial-card-media overflow-hidden">
           <div
-            className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-[#0F4C69]/20 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover/card:opacity-80"
+            className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/55 via-black/5 to-transparent opacity-90 transition-opacity duration-300 group-hover/card:opacity-100"
             aria-hidden
           />
 
@@ -205,20 +195,14 @@ export default function HomeTestimonialGalleryCard({ item, isClone = false }: Ho
         </div>
 
         <div
-          className="relative shrink-0 overflow-hidden border-t bg-gradient-to-br from-[#EBF0F4] via-white to-white px-4 py-4 sm:px-5 sm:py-4"
+          className="relative shrink-0 border-t bg-white px-2 py-2 sm:px-2.5 sm:py-2.5"
           style={{ borderColor: T.cardBorder }}
         >
-          <QuoteIcon className="pointer-events-none absolute -right-1 -top-2 h-16 w-16 text-[#0F4C69]/[0.07] sm:h-20 sm:w-20" />
-
-          <div className="relative flex items-end justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-base font-bold leading-tight text-[#0F4C69] sm:text-lg">{item.name}</p>
-              <div className="mt-2 h-0.5 w-10 rounded-full bg-[#E36630] transition-all duration-300 group-hover/card:w-14" />
-            </div>
-            <span className="max-w-[48%] shrink-0 rounded-md bg-[#0F4C69] px-2 py-1 text-center text-[9px] font-bold uppercase leading-tight tracking-wide text-white shadow-sm sm:max-w-[52%] sm:px-2.5 sm:py-1.5 sm:text-[10px]">
-              {item.profession}
-            </span>
-          </div>
+          <p className="truncate text-[11px] font-bold leading-tight text-[#0F4C69] sm:text-xs">{item.name}</p>
+          <p className="mt-1 line-clamp-2 text-[8px] font-semibold uppercase leading-snug tracking-wide text-[#0F4C69]/80 sm:text-[9px]">
+            {item.profession}
+          </p>
+          <div className="mt-1.5 h-0.5 w-7 rounded-full bg-[#E36630]" />
         </div>
       </article>
     </div>

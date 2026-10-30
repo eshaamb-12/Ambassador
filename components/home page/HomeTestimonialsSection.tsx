@@ -193,17 +193,17 @@ export default function HomeTestimonialsSection({ content: contentProp }: HomeTe
   if (items.length === 0) return null;
 
   const arrowBtnClass =
-    'absolute top-[calc(50%+0.5rem)] z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border bg-white/95 shadow-md backdrop-blur-sm transition-all hover:border-[#0F4C69]/30 hover:bg-white hover:shadow-lg sm:h-11 sm:w-11 md:h-12 md:w-12';
+    'absolute top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border bg-white/95 shadow-md backdrop-blur-sm transition-all hover:border-[#0F4C69]/30 hover:bg-white hover:shadow-lg sm:h-11 sm:w-11 md:h-12 md:w-12';
 
   return (
-    <section className="border-t border-gray-100 bg-white py-12 sm:py-14 md:py-16">
-      <div className="container mx-auto mb-8 max-w-3xl px-4 text-center sm:mb-10">
+    <section className="border-t border-gray-100 bg-white py-10 sm:py-12 md:py-14">
+      <div className="container mx-auto mb-6 max-w-3xl px-4 text-center sm:mb-8">
         <h2 className={homeSectionTitleLight}>
           <span style={{ color: T.title }}>{content.titleBefore} </span>
           <span style={{ color: T.titleHighlight }}>{content.titleHighlight}</span>
         </h2>
         <p className={`mt-3 ${homeSectionDescriptionLight}`}>{content.subtitle}</p>
-        <div className="mx-auto mt-5 h-1 w-12 rounded-full bg-[#E36630] sm:w-16" aria-hidden />
+        <div className="mx-auto mt-4 h-1 w-12 rounded-full bg-[#E36630] sm:w-14" aria-hidden />
       </div>
 
       <div className="relative w-full">
@@ -236,7 +236,7 @@ export default function HomeTestimonialsSection({ content: contentProp }: HomeTe
 
         <div
           ref={trackRef}
-          className="testimonial-track testimonial-track-full flex w-full max-w-[100vw] gap-4 overflow-x-auto overflow-y-visible pb-14 pt-8 [scrollbar-width:none] sm:gap-5 lg:gap-6 [&::-webkit-scrollbar]:hidden"
+          className="testimonial-track testimonial-track-full flex w-full max-w-[100vw] items-center gap-4 overflow-x-auto overflow-y-visible pb-10 pt-5 [scrollbar-width:none] sm:gap-5 sm:pb-11 sm:pt-6 md:pb-12 lg:gap-6 [&::-webkit-scrollbar]:hidden"
         >
           {loopSlides.map(({ item, copy, index }) => (
             <HomeTestimonialGalleryCard

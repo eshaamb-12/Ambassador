@@ -81,12 +81,11 @@ function HomeCategoriesSection({ intro }: { intro: HomeCategoriesIntro }) {
             Array.from({ length: INITIAL_ROWS * columns }).map((_, i) => (
               <div
                 key={i}
-                className="overflow-hidden rounded-lg border border-gray-100 bg-gray-50 animate-pulse sm:rounded-xl"
+                className="relative aspect-square w-full overflow-hidden rounded-lg border border-gray-100 bg-gray-200 animate-pulse sm:rounded-xl"
               >
-                <div className="aspect-square w-full bg-gray-200" />
-                <div className="space-y-2 p-3 sm:p-4">
-                  <div className="h-4 w-3/4 rounded bg-gray-200 sm:h-5" />
-                  <div className="h-3 w-1/3 rounded bg-gray-200 sm:h-4" />
+                <div className="absolute inset-x-0 bottom-0 space-y-2 p-3 sm:p-4">
+                  <div className="mx-auto h-4 w-3/4 rounded bg-gray-300 sm:h-5" />
+                  <div className="mx-auto h-3 w-1/3 rounded bg-gray-300 sm:h-4" />
                 </div>
               </div>
             ))

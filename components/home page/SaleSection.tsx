@@ -167,7 +167,7 @@ export default function SaleSection({ content: contentProp }: SaleSectionProps) 
           limit: String(SALE_LIMIT),
           sort: 'newest',
         });
-        const res = await fetch(`/api/products?${params.toString()}`, { cache: 'no-store' });
+        const res = await fetch(`/api/products?${params.toString()}`);
         const json = await res.json();
         if (!cancelled && json?.success && Array.isArray(json.data)) {
           const sorted = [...(json.data as SaleProduct[])].sort(

@@ -1,10 +1,10 @@
+import { unstable_cache } from 'next/cache';
 import connectDB from '@/backend/config/db';
 import Category from '@/backend/models/Category.model';
 import { categoryListSort, ensureCategorySortOrders } from '@/backend/lib/categoryOrder';
 import { sortStorefrontCategories, type StorefrontCategory } from '@/lib/storefrontCategories';
 
-/** Active categories for storefront (SSR — no /api call). */
-export async function getStorefrontCategoriesServer(): Promise<StorefrontCategory[]> {
+async function loadStorefrontCategories(): Promise<StorefrontCategory[]> {
   await connectDB();
   await ensureCategorySortOrders();
 
@@ -24,4 +24,12 @@ export async function getStorefrontCategoriesServer(): Promise<StorefrontCategor
       sortOrder: c.sortOrder,
     })),
   ).filter((c) => c.title && c.slug);
+}
+
+/** Active categories for storefront (SSR — no /api call). */
+export async function getStorefrontCategoriesServer(): Promise<StorefrontCategory[]> {
+  return unstable_cache(loadStorefrontCategories, ['storefront-categories'], {
+    revalidate: 300,
+    tags: ['storefront-categories'],
+  })();
 }

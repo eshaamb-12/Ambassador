@@ -2,10 +2,8 @@ import mongoose from 'mongoose';
 import Product from '@/backend/models/Product.model';
 import Category from '@/backend/models/Category.model';
 import Review from '@/backend/models/Review.model';
-import { shuffleWithSeed } from '@/utils/seededShuffle.util';
 import { resolveProductImages } from '@/utils/productMedia.util';
 import { sortPopulatedCategories } from '@/lib/storefrontCategories';
-import { orderProductSpecifications } from '@/lib/productSpecifications';
 import { MAIN_CATALOG_FILTER, USED_EQUIPMENT_FILTER } from '@/backend/lib/productTypeFilters';
 
 export const PUBLIC_PRODUCTS_PAGE_LIMIT = 12;
@@ -68,9 +66,34 @@ const LISTING_PROJECTION = {
   imagePublicIds: 1,
   createdAt: 1,
   about: 1,
-  specifications: 1,
-  specificationOrder: 1,
 };
+
+const AGG_CATEGORY_LOOKUP = [
+  {
+    $lookup: {
+      from: 'categories',
+      localField: 'categories',
+      foreignField: '_id',
+      as: 'categoryDocs',
+    },
+  },
+  {
+    $project: {
+      ...LISTING_PROJECTION,
+      categories: {
+        $map: {
+          input: '$categoryDocs',
+          as: 'c',
+          in: {
+            title: '$$c.title',
+            slug: '$$c.slug',
+            sortOrder: { $ifNull: ['$$c.sortOrder', 0] },
+          },
+        },
+      },
+    },
+  },
+] as const;
 
 function enrichListingProduct(p: Record<string, unknown> & { _id: unknown }) {
   const resolved = resolveProductImages({
@@ -84,13 +107,40 @@ function enrichListingProduct(p: Record<string, unknown> & { _id: unknown }) {
     categories: sortPopulatedCategories(
       Array.isArray(p.categories) ? (p.categories as { sortOrder?: number; title?: string }[]) : [],
     ),
-    specifications: orderProductSpecifications(
-      (p.specifications as Record<string, string>) ?? {},
-      Array.isArray(p.specificationOrder) ? (p.specificationOrder as string[]) : undefined,
-    ),
+    specifications: {},
     features: Array.isArray(p.features) ? p.features : [],
     brands: Array.isArray(p.brands) ? p.brands.filter((x): x is string => typeof x === 'string') : [],
   };
+}
+
+async function loadRatingMap(productIds: mongoose.Types.ObjectId[]) {
+  const ratingMap: Record<string, { avgRating: number; reviewCount: number }> = {};
+  if (productIds.length === 0) return ratingMap;
+
+  const ratings = await Review.aggregate([
+    { $match: { status: 'approved', productId: { $in: productIds } } },
+    { $group: { _id: '$productId', avgRating: { $avg: '$rating' }, reviewCount: { $sum: 1 } } },
+  ]);
+
+  for (const r of ratings) {
+    ratingMap[String(r._id)] = { avgRating: r.avgRating, reviewCount: r.reviewCount };
+  }
+  return ratingMap;
+}
+
+function attachRatings(
+  products: Record<string, unknown>[],
+  ratingMap: Record<string, { avgRating: number; reviewCount: number }>,
+) {
+  return products.map((p) => {
+    const id = String(p._id);
+    const r = ratingMap[id];
+    return {
+      ...enrichListingProduct({ ...p, _id: id }),
+      avgRating: r ? +Number(r.avgRating).toFixed(1) : 0,
+      reviewCount: r?.reviewCount ?? 0,
+    };
+  }) as PublicListingProduct[];
 }
 
 /** Shared product listing query for API routes and SSR. */
@@ -185,135 +235,76 @@ export async function queryPublicProducts(input: PublicProductsQuery): Promise<P
   const usePriceSort = sortBy === 'price_asc' || sortBy === 'price_desc';
   const useNameCollation = sortBy === 'name_asc' || sortBy === 'name_desc';
 
-  const ratingsPromise = Review.aggregate([
-    { $match: { status: 'approved' } },
-    { $group: { _id: '$productId', avgRating: { $avg: '$rating' }, reviewCount: { $sum: 1 } } },
-  ]);
+  const countPromise = Product.countDocuments(filter);
+  let productsPromise: Promise<Record<string, unknown>[]>;
 
   if (sortBy === 'random') {
-    const seed = Number.isFinite(input.seed) ? Number(input.seed) : Date.now();
+    const seed = Number.isFinite(input.seed) ? Number(input.seed) : 1;
 
-    const [idRows, totalCount, ratings] = await Promise.all([
-      Product.find(filter).select('_id').lean(),
-      Product.countDocuments(filter),
-      ratingsPromise,
+    productsPromise = Product.aggregate([
+      { $match: filter },
+      {
+        $addFields: {
+          sortRand: {
+            $mod: [
+              {
+                $add: [
+                  {
+                    $convert: {
+                      input: { $substrCP: [{ $toString: '$_id' }, 18, 6] },
+                      to: 'int',
+                      onError: 0,
+                    },
+                  },
+                  seed,
+                ],
+              },
+              2147483647,
+            ],
+          },
+        },
+      },
+      { $sort: { sortRand: 1, _id: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      ...AGG_CATEGORY_LOOKUP,
     ]);
-
-    const total = totalCount;
-    const orderedIds = shuffleWithSeed(
-      idRows.map((row) => String(row._id)),
-      seed,
-    ).slice(skip, skip + limit);
-
-    const products =
-      orderedIds.length === 0
-        ? []
-        : await (async () => {
-            const rows = await Product.find({ _id: { $in: orderedIds } }, LISTING_PROJECTION)
-              .populate('categories', 'title slug sortOrder')
-              .lean();
-            const order = new Map(orderedIds.map((id, index) => [id, index]));
-            return [...rows].sort(
-              (a, b) => (order.get(String(a._id)) ?? 0) - (order.get(String(b._id)) ?? 0),
-            );
-          })();
-
-    const ratingMap: Record<string, { avgRating: number; reviewCount: number }> = {};
-    for (const r of ratings) ratingMap[String(r._id)] = { avgRating: r.avgRating, reviewCount: r.reviewCount };
-
-    const enriched = products.map((p) => {
-      const id = String(p._id);
-      const r = ratingMap[id];
-      return enrichListingProduct({
-        ...p,
-        _id: id,
-        avgRating: r ? +Number(r.avgRating).toFixed(1) : 0,
-        reviewCount: r?.reviewCount ?? 0,
-      });
-    });
-
-    return {
-      data: enriched as PublicListingProduct[],
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    };
+  } else if (usePriceSort) {
+    productsPromise = Product.aggregate([
+      { $match: filter },
+      {
+        $addFields: {
+          sortPrice: {
+            $cond: [{ $gt: [{ $ifNull: ['$price', 0] }, 0] }, '$price', '$originalPrice'],
+          },
+        },
+      },
+      { $sort: { sortPrice: sortBy === 'price_desc' ? -1 : 1, createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      ...AGG_CATEGORY_LOOKUP,
+    ]);
+  } else {
+    productsPromise = (async () => {
+      let query = Product.find(filter, LISTING_PROJECTION)
+        .populate('categories', 'title slug sortOrder')
+        .sort(sortOrder)
+        .skip(skip)
+        .limit(limit);
+      if (useNameCollation) {
+        query = query.collation({ locale: 'en', strength: 2 });
+      }
+      return query.lean() as unknown as Promise<Record<string, unknown>[]>;
+    })();
   }
 
-  const productsPromise = usePriceSort
-    ? Product.aggregate([
-        { $match: filter },
-        {
-          $addFields: {
-            sortPrice: {
-              $cond: [{ $gt: [{ $ifNull: ['$price', 0] }, 0] }, '$price', '$originalPrice'],
-            },
-          },
-        },
-        { $sort: { sortPrice: sortBy === 'price_desc' ? -1 : 1, createdAt: -1 } },
-        { $skip: skip },
-        { $limit: limit },
-        {
-          $lookup: {
-            from: 'categories',
-            localField: 'categories',
-            foreignField: '_id',
-            as: 'categoryDocs',
-          },
-        },
-        {
-          $project: {
-            ...LISTING_PROJECTION,
-            categories: {
-              $map: {
-                input: '$categoryDocs',
-                as: 'c',
-                in: {
-                  title: '$$c.title',
-                  slug: '$$c.slug',
-                  sortOrder: { $ifNull: ['$$c.sortOrder', 0] },
-                },
-              },
-            },
-          },
-        },
-      ])
-    : (() => {
-        let query = Product.find(filter, LISTING_PROJECTION)
-          .populate('categories', 'title slug sortOrder')
-          .sort(sortOrder)
-          .skip(skip)
-          .limit(limit);
-        if (useNameCollation) {
-          query = query.collation({ locale: 'en', strength: 2 });
-        }
-        return query.lean();
-      })();
-
-  const [productsResult, totalResult, ratings] = await Promise.all([
-    productsPromise,
-    Product.countDocuments(filter),
-    ratingsPromise,
-  ]);
-
-  const total = totalResult;
-
-  const ratingMap: Record<string, { avgRating: number; reviewCount: number }> = {};
-  for (const r of ratings) ratingMap[String(r._id)] = { avgRating: r.avgRating, reviewCount: r.reviewCount };
-
-  const enriched = (productsResult as Record<string, unknown>[]).map((p) => {
-    const id = String(p._id);
-    const r = ratingMap[id];
-    return enrichListingProduct({
-      ...p,
-      _id: id,
-      avgRating: r ? +Number(r.avgRating).toFixed(1) : 0,
-      reviewCount: r?.reviewCount ?? 0,
-    });
-  });
+  const [productsResult, total] = await Promise.all([productsPromise, countPromise]);
+  const productIds = productsResult.map((p) => new mongoose.Types.ObjectId(String(p._id)));
+  const ratingMap = await loadRatingMap(productIds);
+  const enriched = attachRatings(productsResult, ratingMap);
 
   return {
-    data: enriched as PublicListingProduct[],
+    data: enriched,
     total,
     page,
     totalPages: Math.ceil(total / limit),

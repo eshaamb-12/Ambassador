@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import connectDB from '@/backend/config/db';
 import Review from '@/backend/models/Review.model';
 import {
@@ -62,18 +61,11 @@ export async function getPublicProductDetail(identifier: string): Promise<GetPub
     .select('reviewerName rating comment createdAt')
     .lean();
 
-  const agg = await Review.aggregate([
-    { $match: { productId: new mongoose.Types.ObjectId(productId), status: 'approved' } },
-    {
-      $group: {
-        _id: null,
-        avgRating: { $avg: '$rating' },
-        reviewCount: { $sum: 1 },
-      },
-    },
-  ]);
-  const avgRating = agg[0] ? +Number(agg[0].avgRating).toFixed(1) : 0;
-  const reviewCount = agg[0]?.reviewCount ?? 0;
+  const reviewCount = reviews.length;
+  const avgRating =
+    reviewCount > 0
+      ? +Number(reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1)
+      : 0;
 
   const images = resolveProductImages({
     images: product.images,

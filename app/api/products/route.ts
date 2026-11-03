@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/backend/config/db';
-import {
-  PUBLIC_PRODUCTS_PAGE_LIMIT,
-  queryPublicProducts,
-} from '@/backend/lib/queryPublicProducts';
+import { PUBLIC_PRODUCTS_PAGE_LIMIT } from '@/backend/lib/queryPublicProducts';
+import { getPublicProductsCached } from '@/lib/server/cachedPublicProducts';
 
-export const dynamic = 'force-dynamic';
-
-const NO_STORE = { 'Cache-Control': 'no-store' } as const;
+const LISTING_CACHE_HEADERS = {
+  'Cache-Control': 'public, max-age=60, s-maxage=120, stale-while-revalidate=300',
+} as const;
 
 /** GET /api/products?page=1&limit=12&search=...&category=... */
 export async function GET(req: NextRequest) {
@@ -17,7 +15,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const seedRaw = parseInt(searchParams.get('seed') ?? '', 10);
 
-    const result = await queryPublicProducts({
+    const result = await getPublicProductsCached({
       search: searchParams.get('search') ?? '',
       categoryTitle: searchParams.get('category') ?? '',
       page: Math.max(1, parseInt(searchParams.get('page') ?? '1', 10)),
@@ -36,7 +34,7 @@ export async function GET(req: NextRequest) {
       seed: Number.isFinite(seedRaw) ? seedRaw : undefined,
     });
 
-    return NextResponse.json({ success: true, ...result }, { status: 200, headers: NO_STORE });
+    return NextResponse.json({ success: true, ...result }, { status: 200, headers: LISTING_CACHE_HEADERS });
   } catch (error) {
     console.error('[GET /api/products]', error);
     return NextResponse.json({ success: false, message: 'Server error.' }, { status: 500 });

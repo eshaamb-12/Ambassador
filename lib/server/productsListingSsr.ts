@@ -3,10 +3,10 @@ import Category from '@/backend/models/Category.model';
 import { getStorefrontCategoriesServer } from '@/backend/lib/getStorefrontCategoriesServer';
 import {
   PUBLIC_PRODUCTS_PAGE_LIMIT,
-  queryPublicProducts,
   type PublicProductsQuery,
   type PublicProductsQueryResult,
 } from '@/backend/lib/queryPublicProducts';
+import { getPublicProductsCached } from '@/lib/server/cachedPublicProducts';
 import type { StorefrontCategory } from '@/lib/storefrontCategories';
 
 const SORT_MAP: Record<string, string> = {
@@ -80,7 +80,7 @@ export async function loadProductsListingForPage(options: {
     query.seed = Number.isFinite(seedRaw) ? seedRaw : 1;
   }
 
-  const listing = await queryPublicProducts(query);
+  const listing = await getPublicProductsCached(query);
 
   return { categories, listing };
 }

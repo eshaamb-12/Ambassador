@@ -1,4 +1,4 @@
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import {
   productDetailPath,
   productUrlSegment,
@@ -26,6 +26,8 @@ export function revalidateStorefrontProduct(product: {
 
   revalidatePath('/products');
   revalidatePath('/used-equipment');
+  revalidateTag('storefront-products', { expire: 0 });
+  revalidateTag('storefront-categories', { expire: 0 });
 
   for (const cat of product.categories ?? []) {
     const slug = typeof cat.slug === 'string' ? cat.slug.trim().toLowerCase() : '';

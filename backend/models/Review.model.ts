@@ -65,6 +65,7 @@ reviewSchema.index(
     partialFilterExpression: { orderId: { $type: 'objectId' } },
   }
 );
+reviewSchema.index({ status: 1, productId: 1 });
 
 if (process.env.NODE_ENV !== 'production' && mongoose.models.Review) {
   delete (mongoose.models as Record<string, unknown>).Review;

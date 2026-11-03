@@ -515,6 +515,7 @@ const ProductsPage = ({
     initialListing ? initialListing.rows.map(mapApiToProduct) : [],
   );
   const skipInitialListingFetch = useRef(Boolean(initialListing));
+  const skipInitialUrlSync = useRef(Boolean(initialListing));
   const { categories: storefrontCategories } = useStorefrontCategories(initialCategories);
   const categoryMeta = useMemo(
     () =>
@@ -536,7 +537,10 @@ const ProductsPage = ({
     () => searchParams.get('category') || ALL,
   );
   const [searchTerm,  setSearchTerm]  = useState(() => searchParams.get('search')  || '');
-  const [shuffleSeed] = useState(() => Date.now());
+  const [shuffleSeed] = useState(() => {
+    const fromUrl = parseInt(searchParams.get('seed') ?? '', 10);
+    return Number.isFinite(fromUrl) ? fromUrl : 1;
+  });
   const [sortBy,      setSortBy]      = useState(() => filtersFromSearchParams(searchParams).sortBy);
   const [currentPage, setCurrentPage] = useState(() => Math.max(1, parseInt(searchParams.get('page') || '1', 10)));
   const [priceRange,  setPriceRange]  = useState(() => filtersFromSearchParams(searchParams).priceRange);
@@ -716,6 +720,10 @@ const ProductsPage = ({
   useEffect(() => {
     if (!filtersReadyFromUrl.current) return;
     if (slugPath && categoryMeta.length === 0) return;
+    if (skipInitialUrlSync.current) {
+      skipInitialUrlSync.current = false;
+      return;
+    }
     syncURL();
   },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -805,7 +813,7 @@ const ProductsPage = ({
         if (activeFeats.length)             params.set('features', activeFeats.join(','));
         if (isUsedCatalog)                  params.set('used', '1');
 
-        const res  = await fetch(`/api/products?${params.toString()}`, { cache: 'no-store' });
+        const res  = await fetch(`/api/products?${params.toString()}`);
         const json = await res.json();
         if (!json?.success || !Array.isArray(json.data)) throw new Error(json?.message || 'Failed to load products.');
         if (cancelled) return;

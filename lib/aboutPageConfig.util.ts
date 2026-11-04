@@ -75,6 +75,23 @@ function normalizeStringList(raw: unknown, defaults: string[]): string[] {
   return defaults.map((def, i) => str(raw[i], def));
 }
 
+/** CMS may still store the old 25+ years copy — map to current defaults (15+). */
+const LEGACY_YEARS_VALUE = /^25\+?$/;
+
+function coalesceYearsStatValue(value: string, fallback: string): string {
+  const v = value.trim();
+  return LEGACY_YEARS_VALUE.test(v) ? fallback : v || fallback;
+}
+
+function normalizeCompanyParagraphs(raw: unknown, defaults: string[]): string[] {
+  const lines = normalizeStringList(raw, defaults);
+  return lines.map((p) =>
+    p
+      .replace(/\bmore than 25 years\b/gi, 'more than 15 years')
+      .replace(/\b25\+?\s*years\b/gi, '15 years'),
+  );
+}
+
 function normalizeBanner(raw: unknown): AboutBannerContent {
   const d = DEFAULT_ABOUT_PAGE_CONFIG.banner;
   if (!raw || typeof raw !== 'object') return d;
@@ -96,12 +113,18 @@ function normalizeCompany(raw: unknown): AboutCompanyContent {
     eyebrow: str(c.eyebrow, d.eyebrow),
     titleBefore: str(c.titleBefore, d.titleBefore),
     titleHighlight: str(c.titleHighlight, d.titleHighlight),
-    paragraphs: normalizeStringList(c.paragraphs, d.paragraphs),
+    paragraphs: normalizeCompanyParagraphs(c.paragraphs, d.paragraphs),
     imageUrl: str(c.imageUrl, d.imageUrl),
     imageAlt: str(c.imageAlt, d.imageAlt),
-    floatBadgeValue: str(c.floatBadgeValue, d.floatBadgeValue),
+    floatBadgeValue: coalesceYearsStatValue(str(c.floatBadgeValue, d.floatBadgeValue), d.floatBadgeValue),
     floatBadgeLabel: str(c.floatBadgeLabel, d.floatBadgeLabel),
-    highlights: d.highlights.map((def, i) => normalizeStat(highlightsRaw[i], def)),
+    highlights: d.highlights.map((def, i) => {
+      const stat = normalizeStat(highlightsRaw[i], def);
+      if (def.label === 'Years of Experience') {
+        return { ...stat, value: coalesceYearsStatValue(stat.value, def.value) };
+      }
+      return stat;
+    }),
   };
 }
 

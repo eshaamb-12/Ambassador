@@ -35,7 +35,7 @@ export const DEFAULT_ABOUT_PAGE_CONFIG: AboutPageConfig = {
     floatBadgeValue: '15+',
     floatBadgeLabel: 'Years Trusted',
     highlights: [
-      { value: '15+', label: 'Years of Experience' },
+      { value: '20+', label: 'Years of Experience' },
       { value: '500+', label: 'Products Supplied' },
       { value: '1200+', label: 'Happy Clients' },
       { value: '50+', label: 'Cities Covered' },
@@ -55,7 +55,7 @@ export const DEFAULT_ABOUT_PAGE_CONFIG: AboutPageConfig = {
     highlights: [
       { value: 'Brand', label: 'Of The Year' },
       { value: 'Rising', label: 'Brand Award' },
-      { value: '15+', label: 'Years Leading' },
+      { value: '20+', label: 'Years Leading' },
       { value: '1000+', label: 'Kitchens Served' },
     ],
     imageUrl: '/Images/Boss-Picture.png',

@@ -56,6 +56,34 @@ function str(value: unknown, fallback: string): string {
 
 }
 
+/** Root-relative paths for next/image `src` must start with `/` (public/). HTTP(S) left unchanged. */
+function publicImageSrc(value: unknown, fallback: string): string {
+  const raw = str(value, fallback);
+  if (!raw) return fallback;
+  const lower = raw.toLowerCase();
+  if (lower.startsWith('http://') || lower.startsWith('https://')) return raw;
+  return raw.startsWith('/') ? raw : `/${raw}`;
+}
+
+/**
+ * Home page custom-kitchen image is often overridden by CMS (MongoDB). When we ship a new default
+ * asset, merge still kept the old stored path — remap those here so code changes take effect without
+ * a manual admin edit.
+ */
+const LEGACY_CUSTOM_KITCHEN_IMAGE_URLS = new Set([
+  'images/installed.webp',
+  'images/home/custom-kitchen.jpeg',
+]);
+
+function normalizeCustomKitchenImageUrl(raw: unknown, fallback: string): string {
+  const resolved = publicImageSrc(raw, fallback);
+  const lower = resolved.toLowerCase();
+  if (lower.startsWith('http://') || lower.startsWith('https://')) return resolved;
+  const key = resolved.replace(/^\/+/, '').replace(/\\/g, '/').toLowerCase();
+  if (LEGACY_CUSTOM_KITCHEN_IMAGE_URLS.has(key)) return fallback;
+  return resolved;
+}
+
 
 
 function normalizeSections(raw: unknown): HomeSectionConfig[] {
@@ -312,7 +340,7 @@ function normalizeCustomKitchen(raw: unknown): HomeCustomKitchenContent {
 
     description: str(c.description, d.description),
 
-    imageUrl: str(c.imageUrl, d.imageUrl),
+    imageUrl: normalizeCustomKitchenImageUrl(c.imageUrl, d.imageUrl),
 
     imageAlt: str(c.imageAlt, d.imageAlt),
 

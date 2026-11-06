@@ -167,7 +167,7 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
     titleAfter: '— From First Call to Completion',
     description:
       'Restaurants and food businesses across Pakistan partner with Ambassador for custom commercial kitchen design — measured on-site, visualised in 2D & 3D, approved by you, then installed by our own specialists with customised commercial kitchen equipment.',
-    imageUrl: '/Images/installed.webp',
+    imageUrl: '/home/custom-kitchen.jpeg',
     imageAlt: 'Custom commercial kitchen design and installation for restaurants – Ambassador Pakistan',
     imageBadge: 'Design · Fabricate · Install',
     highlights: [

@@ -58,15 +58,13 @@ function SaleProductCard({ product }: { product: SaleProduct }) {
     borderColor: T.cardBorder,
     '--sale-card-shadow': T.cardShadow,
     '--sale-card-shadow-hover': T.cardShadowHover,
+    '--sale-card-border-hover': T.cardBorderHover,
   } as CSSProperties;
 
   return (
-    <div
-      data-sale-card
-      className="group/sale shrink-0 px-1.5 pb-3 pt-1 transition-transform duration-300 ease-out hover:-translate-y-1"
-    >
+    <div data-sale-card className="group/sale shrink-0 px-1.5 pb-2 pt-1">
       <article
-        className={`flex flex-col overflow-hidden rounded-xl border bg-white [box-shadow:var(--sale-card-shadow)] transition-shadow duration-300 group-hover/sale:[box-shadow:var(--sale-card-shadow-hover)] sm:rounded-2xl ${SALE_CARD_HEIGHT} ${SALE_CARD_WIDTH}`}
+        className={`flex flex-col overflow-hidden rounded-xl border bg-white [box-shadow:var(--sale-card-shadow)] transition-[box-shadow,border-color] duration-300 group-hover/sale:[border-color:var(--sale-card-border-hover)] group-hover/sale:[box-shadow:var(--sale-card-shadow-hover)] sm:rounded-2xl ${SALE_CARD_HEIGHT} ${SALE_CARD_WIDTH}`}
         style={cardStyle}
       >
         <Link
@@ -314,8 +312,8 @@ export default function SaleSection({ content: contentProp }: SaleSectionProps) 
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className={`shrink-0 animate-pulse rounded-xl border bg-[#EBF0F4] first:ml-3 last:mr-3 sm:rounded-2xl sm:first:ml-4 sm:last:mr-4 md:first:ml-6 md:last:mr-6 ${SALE_CARD_HEIGHT} ${SALE_CARD_WIDTH}`}
-              style={{ borderColor: T.cardBorder }}
+              className={`shrink-0 animate-pulse rounded-xl border border-[#D4DEE6] bg-white/60 first:ml-3 last:mr-3 sm:rounded-2xl sm:first:ml-4 sm:last:mr-4 md:first:ml-6 md:last:mr-6 ${SALE_CARD_HEIGHT} ${SALE_CARD_WIDTH}`}
+              style={{ boxShadow: T.cardShadow }}
             />
           ))}
         </div>

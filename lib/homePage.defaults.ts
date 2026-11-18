@@ -21,7 +21,8 @@ export const HOME_SALE_THEME = {
   description: '#5c6b7a',
   ctaBg: '#E36630',
   ctaHover: '#cc5a2a',
-  cardBorder: '#EBF0F4',
+  cardBorder: '#D4DEE6',
+  cardBorderHover: '#B8C8D6',
   cardImageBg: '#FFFFFF',
   category: '#888888',
   productTitle: '#333333',
@@ -31,8 +32,10 @@ export const HOME_SALE_THEME = {
   shopButtonHover: '#0d3d55',
   navButton: '#0F4C69',
   fadeEdge: '#EBF0F4',
-  cardShadow: '0 10px 26px 0 rgba(173, 185, 197, 0.72), 0 4px 14px 0 rgba(173, 185, 197, 0.55)',
-  cardShadowHover: '0 18px 38px 0 rgba(173, 185, 197, 0.85), 0 8px 20px 0 rgba(173, 185, 197, 0.65)',
+  cardShadow:
+    '0 0 0 1px rgba(15, 76, 105, 0.04), 0 1px 2px rgba(15, 76, 105, 0.06), 0 4px 12px -2px rgba(15, 76, 105, 0.08)',
+  cardShadowHover:
+    '0 0 0 1px rgba(15, 76, 105, 0.08), 0 2px 4px rgba(15, 76, 105, 0.06), 0 8px 20px -4px rgba(15, 76, 105, 0.12)',
 } as const;
 
 /** Home custom kitchen section — white band (#0F4C69, #E36630). */

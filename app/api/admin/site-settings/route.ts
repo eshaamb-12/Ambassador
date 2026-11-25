@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/backend/lib/adminAuth';
-import { getPublicSiteSettings, upsertPublicSiteSettings } from '@/backend/lib/loadSiteSettings';
+import { getAdminSiteSettings, upsertPublicSiteSettings } from '@/backend/lib/loadSiteSettings';
 import { normalizeSiteSettingsInput } from '@/lib/siteSettingsValidation';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   if (authError) return authError;
 
   try {
-    const data = await getPublicSiteSettings();
+    const data = await getAdminSiteSettings();
     return NextResponse.json({ success: true, data }, { status: 200 });
   } catch (error) {
     console.error('[GET /api/admin/site-settings]', error);

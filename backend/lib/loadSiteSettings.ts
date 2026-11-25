@@ -4,6 +4,7 @@ import {
   DEFAULT_PUBLIC_SITE_SETTINGS,
   type PublicSiteSettings,
 } from '@/lib/siteSettings.types';
+import { sanitizeHeadExtraHtml } from '@/lib/siteSettingsValidation';
 
 function toPublic(doc: {
   googleAnalyticsId?: string;
@@ -22,12 +23,30 @@ function toPublic(doc: {
   };
 }
 
+async function loadSiteSettingsDoc(): Promise<PublicSiteSettings> {
+  await connectDB();
+  const doc = await SiteSettings.findOne({ key: SITE_SETTINGS_KEY }).lean();
+  return toPublic(doc);
+}
+
+/** Admin SEO screen — exact stored HTML so editors can see and remove snippets later. */
+export async function getAdminSiteSettings(): Promise<PublicSiteSettings> {
+  try {
+    return await loadSiteSettingsDoc();
+  } catch (error) {
+    console.error('[getAdminSiteSettings]', error);
+    return { ...DEFAULT_PUBLIC_SITE_SETTINGS };
+  }
+}
+
 /** Storefront + metadata — never throw; fall back to defaults if DB is unavailable. */
 export async function getPublicSiteSettings(): Promise<PublicSiteSettings> {
   try {
-    await connectDB();
-    const doc = await SiteSettings.findOne({ key: SITE_SETTINGS_KEY }).lean();
-    return toPublic(doc);
+    const raw = await loadSiteSettingsDoc();
+    return {
+      ...raw,
+      headExtraHtml: sanitizeHeadExtraHtml(raw.headExtraHtml),
+    };
   } catch (error) {
     console.error('[getPublicSiteSettings]', error);
     return { ...DEFAULT_PUBLIC_SITE_SETTINGS };

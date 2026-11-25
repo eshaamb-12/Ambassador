@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { PublicSiteSettings } from '@/lib/siteSettings.types';
+import { headExtraHtmlDiffersOnLiveSite } from '@/lib/siteSettingsValidation';
 
 const emptyForm: PublicSiteSettings = {
   googleAnalyticsId: '',
@@ -138,9 +139,16 @@ export default function SeoTrackingSection() {
           Site header — extra HTML for &lt;head&gt;
         </label>
         <p className="mb-2 text-xs text-gray-500">
-          Meta tags, link tags, or JSON-LD. Script tags are removed here — put scripts in the footer field
-          below or use the GA / GTM IDs above.
+          Meta tags, link tags, or JSON-LD. Your paste is saved as entered so you can edit or remove it
+          later. On the live site, executable <code className="text-[11px]">&lt;script&gt;</code> tags (except
+          JSON-LD) are not injected — use the footer field below or the GA / GTM IDs above.
         </p>
+        {headExtraHtmlDiffersOnLiveSite(form.headExtraHtml) && (
+          <p className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            Some header scripts in this box will not run on the public site. Move them to{' '}
+            <strong>Site footer</strong> if you need those snippets live.
+          </p>
+        )}
         <textarea
           value={form.headExtraHtml}
           onChange={(e) => setForm((f) => ({ ...f, headExtraHtml: e.target.value }))}

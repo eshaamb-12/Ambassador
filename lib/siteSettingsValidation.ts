@@ -8,7 +8,8 @@ export function normalizeSiteSettingsInput(raw: Record<string, unknown>): Public
   const googleAnalyticsId = String(raw.googleAnalyticsId ?? '').trim();
   const googleTagManagerId = String(raw.googleTagManagerId ?? '').trim();
   const googleSiteVerification = String(raw.googleSiteVerification ?? '').trim();
-  const headExtraHtml = sanitizeHeadExtraHtml(String(raw.headExtraHtml ?? ''));
+  /** Store raw HTML in DB; sanitize only when serving the public site (see getPublicSiteSettings). */
+  const headExtraHtml = String(raw.headExtraHtml ?? '').trim().slice(0, 20_000);
   const bodyExtraHtml = String(raw.bodyExtraHtml ?? '').trim().slice(0, 20_000);
 
   if (googleAnalyticsId && !GA_ID_RE.test(googleAnalyticsId)) {
@@ -28,6 +29,11 @@ export function normalizeSiteSettingsInput(raw: Record<string, unknown>): Public
     headExtraHtml,
     bodyExtraHtml,
   };
+}
+
+/** True when live site output would drop script tags from the header field (admin still stores full paste). */
+export function headExtraHtmlDiffersOnLiveSite(html: string): boolean {
+  return sanitizeHeadExtraHtml(html).trim() !== html.trim();
 }
 
 /** Header field: meta / link / JSON-LD — block executable scripts (use footer or GA/GTM). */

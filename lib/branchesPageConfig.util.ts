@@ -224,6 +224,27 @@ function normalizeServices(raw: unknown, fallback: string[]): string[] {
 
 
 
+/** Prior Fazaia map pin — CMS may still store this; use current default from `branchesPage.defaults`. */
+const LEGACY_FAZAIA_COORDS = [
+  { lat: 31.367931, lng: 74.235808 },
+  { lat: 31.368033, lng: 74.235808 },
+];
+
+function resolveBranchCoordinates(
+  branchId: string,
+  lat: number,
+  lng: number,
+  fallback: ShowroomBranch,
+): { lat: number; lng: number } {
+  if (branchId !== '1') return { lat, lng };
+  for (const legacy of LEGACY_FAZAIA_COORDS) {
+    if (Math.abs(lat - legacy.lat) < 0.0001 && Math.abs(lng - legacy.lng) < 0.0001) {
+      return { ...fallback.coordinates };
+    }
+  }
+  return { lat, lng };
+}
+
 function normalizeBranch(raw: unknown, fallback: ShowroomBranch): ShowroomBranch {
 
   if (!raw || typeof raw !== 'object') return fallback;
@@ -231,10 +252,13 @@ function normalizeBranch(raw: unknown, fallback: ShowroomBranch): ShowroomBranch
   const c = raw as ShowroomBranch;
 
   const coords = c.coordinates && typeof c.coordinates === 'object' ? c.coordinates : fallback.coordinates;
+  const id = str(c.id, fallback.id);
+  const lat = num(coords.lat, fallback.coordinates.lat);
+  const lng = num(coords.lng, fallback.coordinates.lng);
 
   return {
 
-    id: str(c.id, fallback.id),
+    id,
 
     name: str(c.name, fallback.name),
 
@@ -258,13 +282,7 @@ function normalizeBranch(raw: unknown, fallback: ShowroomBranch): ShowroomBranch
 
     image: str(c.image, fallback.image),
 
-    coordinates: {
-
-      lat: num(coords.lat, fallback.coordinates.lat),
-
-      lng: num(coords.lng, fallback.coordinates.lng),
-
-    },
+    coordinates: resolveBranchCoordinates(id, lat, lng, fallback),
 
     isHeadOffice: c.isHeadOffice === true,
 

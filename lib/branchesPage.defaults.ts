@@ -33,7 +33,7 @@ export const DEFAULT_SHOWROOM_BRANCHES: ShowroomBranch[] = [
     hours: 'Mon–Sat: 9:00 AM – 6:00 PM',
     services: ['Commercial Kitchen Setup', 'Equipment Sales', 'After-Sales Service', 'Spare Parts'],
     image: '/Images/Fazaia-Show-Room.png',
-    coordinates: { lat: 31.367931, lng: 74.235808 },
+    coordinates: { lat: 31.368033, lng: 74.235961 },
   },
   {
     id: '2',
